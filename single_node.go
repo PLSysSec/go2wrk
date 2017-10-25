@@ -2,34 +2,21 @@ package main
 
 import (
     "sync"
-    "fmt"
-    "strconv"
     "math/rand"
     "time"
 )
 
-func Warmup(route string, numConnections, totalCalls int) {
-    // Do we even care about the benchmarking here?
-    responseChannel := make(chan *Response, totalCalls*2)
+func Warmup(route Route, connections, total_calls int) {
+    response_channel := make(chan *Response, total_calls*2)
+    wait_group := &sync.WaitGroup{}
 
-    wg := &sync.WaitGroup{}
-
-    for i := 0; i < numConnections; i++ {
-        //distro
-        wg.Add(1)
-        go StartClient(
-            route,
-            *headers,
-            *requestBody,
-            *method,
-            false, //disablekeepalive
-            responseChannel,
-            wg,
-            totalCalls,
-        )
+    transport := SetTLS(false)
+    for i := 0; i < connections; i++ {
+        wait_group.Add(1)
+        go StartClient(route, response_channel, wait_group, tps.TotalCalls, transport)
     }
 
-    wg.Wait()
+    wait_group.Wait()
 }
 
 
@@ -40,42 +27,31 @@ func SingleNode(tps TPSReport) []byte {
         channels = append(channels, make(chan *Response, tps.TotalCalls*2))
     }
 
-    benchTime := NewTimer()
-    benchTime.Reset()
+    transport := SetTLS(*disable_keep_alives)
+
+    bench_time := NewTimer()
+    bench_time.Reset()
     //TODO check ulimit
-    wg := &sync.WaitGroup{}
+    wait_group := &sync.WaitGroup{}
 
-    s1 := rand.NewSource(time.Now().UnixNano())
-    r1 := rand.New(s1)
+    random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-    for i := 0; i < tps.NumConnections; i++ {
+    for i := 0; i < tps.Connections; i++ {
         //distro
-        index := r1.Intn(len(tps.Routes)) // Generate random index
+        index := random.Intn(len(tps.Routes)) // Generate random index
         route := tps.Routes[index]
 
         //fmt.Println("Starting connection " + strconv.Itoa(i) + " to " + route)
-        wg.Add(1)
-        go StartClient(
-            route,
-            *headers,
-            *requestBody,
-            *method,
-            *disableKeepAlives, // Allow reuse of TCP connection after warmup sequence
-            channels[index],
-            wg,
-            tps.TotalCalls,
-        )
+        wait_group.Add(1)
+        go StartClient(route, channels[index], wait_group, tps.TotalCalls, transport)
     }
 
-    wg.Wait()
+    wait_group.Wait()
 
+    // TODO: if we actually use this, (a json output) we will need to save an array of them
     var result []byte
-    for i:= 0; i < len(tps.Routes); i++ {
-        result = CalcStats(
-            channels[i],
-            benchTime.Duration(),
-            tps.Routes[i],
-        )
+    for i := 0; i < len(tps.Routes); i++ {
+        result = CalcStats(channels[i], bench_time.Duration(), tps.Routes[i].Url)
     }
 
     return result
