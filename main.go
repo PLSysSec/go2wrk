@@ -29,13 +29,19 @@ var (
     key_file = flag.String("key", "someKeyFile", "A PEM encoded private key file.")
     ca_file = flag.String("CA", "someCertCAFile", "A PEM eoncoded CA's certificate file.")
     insecure = flag.Bool("i", true, "TLS checks are disabled")
+    help = flag.Bool("h", false, "for usage")
 )
 
 
 func init() {
     flag.Parse()
 
+    if *help {
+        flag.PrintDefaults()
+        os.Exit(1)
+    }
     initialize_tps()
+    // TODO handle no file error
     config_file := os.Args[len(os.Args)-1]
     if config_file != "" {
         read_config(config_file)
