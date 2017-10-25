@@ -10,6 +10,7 @@ We will send requests according to a given probability distribution. The simples
 
 * - [ ] Build the distro model
     * - [ ] Decide what distributions we want
+    * - [ ] https://en.wikipedia.org/wiki/Traffic_generation_model#Poisson_traffic_model
 * - [ ] IDs in the Headers
     * - [ ] Create ids in the headers
     * - [ ] Figure out how we are using these on the end game
