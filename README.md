@@ -6,7 +6,7 @@ The primary addition we feature is multi-route targetting. Users rarely only hit
 
 We will send requests according to a given probability distribution. The simplest choice is a fair share model where each route will be hit on average the same number of times.
 
-# TODO
+### TODO
 
 * - [ ] Build the distro model
     * - [ ] Decide what distributions we want
@@ -17,7 +17,7 @@ We will send requests according to a given probability distribution. The simples
     * - [ ] Actually get the tls stuff working -- get those certs?
     * - [ ] Add to readme the steps needed for that
 
-# Building and Usage
+### Building and Usage
 
 ```
 go get github.com/kpister/go2wrk
