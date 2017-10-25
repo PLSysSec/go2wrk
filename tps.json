@@ -10,6 +10,6 @@
     ],
     "TotalCalls": 100,
     "Threads": 8,
-    "NumConnections": 30,
+    "Connections": 30,
     "Distro": "Coin"
 } 

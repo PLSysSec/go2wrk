@@ -36,7 +36,6 @@ func init() {
     flag.Parse()
 
     initialize_tps()
-    //target = os.Args[len(os.Args)-1]
     config_file := os.Args[len(os.Args)-1]
     if config_file != "" {
         read_config(config_file)

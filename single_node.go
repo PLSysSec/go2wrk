@@ -31,17 +31,17 @@ func SingleNode(tps TPSReport) []byte {
 
     bench_time := NewTimer()
     bench_time.Reset()
-    //TODO check ulimit
+    // TODO check ulimit
     wait_group := &sync.WaitGroup{}
 
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
     for i := 0; i < tps.Connections; i++ {
-        //distro
+        // distro
+        // TODO: actually write the distro switch
         index := random.Intn(len(tps.Routes)) // Generate random index
         route := tps.Routes[index]
 
-        //fmt.Println("Starting connection " + strconv.Itoa(i) + " to " + route)
         wait_group.Add(1)
         go StartClient(route, channels[index], wait_group, tps.TotalCalls, transport)
     }
