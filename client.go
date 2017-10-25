@@ -42,7 +42,8 @@ func StartClient(route Route, response_channel chan *Response, wait_group *sync.
                 response.Size = http_response.ContentLength
             }
             response.StatusCode = http_response.StatusCode
-            http_response.Body.Close()
+            // This will supposedly stop too many port errors
+            defer http_response.Body.Close()
         }
 
         response.Duration = timer.Duration()
