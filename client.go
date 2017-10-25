@@ -54,6 +54,7 @@ func StartClient(url_, heads, requestBody string, meth string, dka bool, respons
 
     timer := NewTimer()
     for {
+        //fmt.Println("Sending request to " + url_)
         requestBodyReader := strings.NewReader(requestBody)
         req, _ := http.NewRequest(meth, url_, requestBodyReader)
         sets := strings.Split(heads, "\n")
@@ -67,9 +68,8 @@ func StartClient(url_, heads, requestBody string, meth string, dka bool, respons
         }
 
         timer.Reset()
-
+        
         resp, err := tr.RoundTrip(req)
-
         respObj := &Response{}
 
         if err != nil {
@@ -94,4 +94,5 @@ func StartClient(url_, heads, requestBody string, meth string, dka bool, respons
         }
         responseChan <- respObj
     }
+
 }
