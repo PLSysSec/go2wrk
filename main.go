@@ -10,10 +10,11 @@ import (
 )
 
 type TPSReport struct {
-    Urls []string
-    TotalCalls []int
+    Routes []string
+    TotalCalls int
     Threads int
-    NumConnections []int
+    NumConnections int
+    Distro string // This could be a binary mapping instead
 }
 var (
     numThreads        = flag.Int("t", 1, "the numbers of threads used")
@@ -56,12 +57,9 @@ func readConfig(configFile string) {
 func main() {
     // warmup cache on first route
     // TODO: may want to make this more general in case Urls[0] is not always the first one hit
-    fmt.Println("Warming up cache on route " + tps.Urls[0])
-    SingleNode(tps.Urls[0], 10, 1000, true)
+    fmt.Println("Warming up cache on route " + tps.Routes[0])
+    Warmup(tps.Routes[0], 10, 1000)
     fmt.Println("Warmup complete")
 
-    for i, url := range tps.Urls {
-        go SingleNode(url, tps.NumConnections[i], tps.TotalCalls[i], false)
-    }
-    for {}
+    SingleNode(tps)
 }

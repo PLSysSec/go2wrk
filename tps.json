@@ -1,6 +1,7 @@
 {
-    "Urls": ["https://students.ucsd.edu", "https://students.ucsd.edu/academics/advising"],
-    "TotalCalls": [1, 1],
-    "Threads": 3,
-    "NumConnections": [3,3]
+    "Routes": ["https://students.ucsd.edu", "https://students.ucsd.edu/academics/advising"],
+    "TotalCalls": 100,
+    "Threads": 8,
+    "NumConnections": 30,
+    "Distro": "Coin"
 } 

@@ -4,33 +4,25 @@ import (
     "sync"
     "fmt"
     "strconv"
+    "math/rand"
+    "time"
 )
 
-func SingleNode(toCall string, numConnections, totalCalls int, isWarmup bool) []byte {
-    // totalCalls*2 probably so that the channel can hold resquests+responses
+func Warmup(route string, numConnections, totalCalls int) {
+    // Do we even care about the benchmarking here?
     responseChannel := make(chan *Response, totalCalls*2)
 
-    benchTime := NewTimer()
-    benchTime.Reset()
-    //TODO check ulimit
     wg := &sync.WaitGroup{}
 
-    // Allow reuse of TCP connection after warmup sequence
-    dka := *disableKeepAlives
-    if isWarmup {
-        dka = false
-    }
-
     for i := 0; i < numConnections; i++ {
-        fmt.Println("Starting connection " + strconv.Itoa(i) + " to " + toCall)
-        
+        //distro
         wg.Add(1)
         go StartClient(
-            toCall,
+            route,
             *headers,
             *requestBody,
             *method,
-            dka,
+            false, //disablekeepalive
             responseChannel,
             wg,
             totalCalls,
@@ -38,15 +30,51 @@ func SingleNode(toCall string, numConnections, totalCalls int, isWarmup bool) []
     }
 
     wg.Wait()
+}
 
-    // initialize empty byte array incase of warmup
-    result := make([]byte, 0)
 
-    if !isWarmup {
+func SingleNode(tps TPSReport) []byte {
+    // totalCalls*2 probably so that the channel can hold resquests+responses
+    var channels []chan *Response
+    for i := 0; i < len(tps.Routes); i++ {
+        channels = append(channels, make(chan *Response, tps.TotalCalls*2))
+    }
+
+    benchTime := NewTimer()
+    benchTime.Reset()
+    //TODO check ulimit
+    wg := &sync.WaitGroup{}
+
+    s1 := rand.NewSource(time.Now().UnixNano())
+    r1 := rand.New(s1)
+
+    for i := 0; i < tps.NumConnections; i++ {
+        //distro
+        index := r1.Intn(len(tps.Routes)) // Generate random index
+        route := tps.Routes[index]
+
+        //fmt.Println("Starting connection " + strconv.Itoa(i) + " to " + route)
+        wg.Add(1)
+        go StartClient(
+            route,
+            *headers,
+            *requestBody,
+            *method,
+            *disableKeepAlives, // Allow reuse of TCP connection after warmup sequence
+            channels[index],
+            wg,
+            tps.TotalCalls,
+        )
+    }
+
+    wg.Wait()
+
+    var result []byte
+    for i:= 0; i < len(tps.Routes); i++ {
         result = CalcStats(
-            responseChannel,
+            channels[i],
             benchTime.Duration(),
-            toCall,
+            tps.Routes[i],
         )
     }
 

@@ -68,7 +68,7 @@ func StartClient(url_, heads, requestBody string, meth string, dka bool, respons
         }
 
         timer.Reset()
-        
+
         resp, err := tr.RoundTrip(req)
         respObj := &Response{}
 
