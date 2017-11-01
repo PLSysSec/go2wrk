@@ -1,10 +1,10 @@
 # go2wrk
 
-A simpler, more meaninful benchmarking app. Modeled after go-wrk and wrk, this project is designed to test web apps in ways similar to organic internet traffic.
+A simpler, more meaninful benchmarking app modeled after go-wrk and wrk. This project is designed to stress test web apps in ways similar to organic internet traffic.
 
-The primary addition we feature is multi-route targetting. Users rarely only hit a single route of a web app, therefore maximizing performance of one page in isolation is only serving a delusion. By benchmarking how your app does in the presence of different usage, you can identify critical problems in cache and garbage collection.
+The primary addition go2wrk features is multi-route targeting. Users rarely only hit a single route of a web app while browsing, and many apps have to simultaneously handle diverse requests all competing for the same system resources. Therefore, gauging server and application performance on repeated queries to a single route in isolation is only serving a delusion. Unfortunately, this is the limited functionality of most benchmarking tools today. go2wrk benchmarks how your app and hardware perform in the presence of different usage patterns, and allows you to identify critical problems in cache and garbage collection.
 
-We will send requests according to a given probability distribution. The simplest choice is a fair share model where each route will be hit on average the same number of times.
+go2wrk sends requests according to a given probability distribution. The simplest choice is a fair-share model where each route will be hit the same number of times on average.
 
 ### TODO
 
@@ -27,7 +27,7 @@ go build        // alternatively use go install if you have set your $GOPATH
 ```
 You now should have an executable which you can run
 ```
-./go2wrk [flags] tps.json
+./go2wrk [flags] routes.json
 ```
 The design philosophy we follow is that any configuration pertaining to the multiple routes should be configured from within the json file, while the app-wide features should be flags. 
 
@@ -54,7 +54,7 @@ A full list of flags:
     	the numbers of threads used
 ```
 
-A normal routes.json file will look something like below
+A normal routes.json file will look something like the following:
 ``` 
 {
     "Routes": 
