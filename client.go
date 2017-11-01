@@ -1,98 +1,57 @@
 package main
 
 import (
-    "crypto/tls"
-    "crypto/x509"
     "io/ioutil"
-    "log"
     "net/http"
-    "net/url"
     "strings"
     "sync"
 )
 
-func StartClient(url_, heads, requestBody string, meth string, dka bool, responseChan chan *Response, waitGroup *sync.WaitGroup, tc int) {
-    defer waitGroup.Done()
-
-    var tr *http.Transport
-
-    u, err := url.Parse(url_)
-
-    if err == nil && u.Scheme == "https" {
-        var tlsConfig *tls.Config
-        if *insecure {
-            tlsConfig = &tls.Config{
-                InsecureSkipVerify: true,
-            }
-        } else {
-            // Load client cert
-            cert, err := tls.LoadX509KeyPair(*certFile, *keyFile)
-            if err != nil {
-                log.Fatal(err)
-            }
-
-            // Load CA cert
-            caCert, err := ioutil.ReadFile(*caFile)
-            if err != nil {
-                log.Fatal(err)
-            }
-            caCertPool := x509.NewCertPool()
-            caCertPool.AppendCertsFromPEM(caCert)
-
-            // Setup HTTPS client
-            tlsConfig = &tls.Config{
-                Certificates: []tls.Certificate{cert},
-                RootCAs:      caCertPool,
-            }
-            tlsConfig.BuildNameToCertificate()
-        }
-
-        tr = &http.Transport{TLSClientConfig: tlsConfig, DisableKeepAlives: dka}
-    } else {
-        tr = &http.Transport{DisableKeepAlives: dka}
-    }
+func StartClient(route Route, response_channel chan *Response, wait_group *sync.WaitGroup, total_calls int, transport *http.Transport) {
+    defer wait_group.Done()
 
     timer := NewTimer()
     for {
-        //fmt.Println("Sending request to " + url_)
-        requestBodyReader := strings.NewReader(requestBody)
-        req, _ := http.NewRequest(meth, url_, requestBodyReader)
-        sets := strings.Split(heads, "\n")
+        request_body_reader := strings.NewReader(route.RequestBody)
+        request, _ := http.NewRequest(route.Method, route.Url, request_body_reader)
+        header_pairs := strings.Split(route.Headers, "\n")
 
-        //Split incoming header string by \n and build header pairs
-        for i := range sets {
-            split := strings.SplitN(sets[i], ":", 2)
+        // Split incoming header string by \n and build header pairs
+        // TODO: Add counter increment to header
+        for i := range header_pairs {
+            split := strings.SplitN(header_pairs[i], ":", 2)
             if len(split) == 2 {
-                req.Header.Set(split[0], split[1])
+                request.Header.Set(split[0], split[1])
             }
         }
 
         timer.Reset()
-        
-        resp, err := tr.RoundTrip(req)
-        respObj := &Response{}
+
+        http_response, err := transport.RoundTrip(request)
+        response := &Response{}
 
         if err != nil {
-            respObj.Error = true
+            response.Error = true
         } else {
-            if resp.ContentLength < 0 { // -1 if the length is unknown
-                data, err := ioutil.ReadAll(resp.Body)
+            if http_response.ContentLength < 0 { // -1 if the length is unknown
+                content, err := ioutil.ReadAll(http_response.Body)
                 if err == nil {
-                    respObj.Size = int64(len(data))
+                    response.Size = int64(len(content))
                 }
             } else {
-                respObj.Size = resp.ContentLength
+                response.Size = http_response.ContentLength
             }
-            respObj.StatusCode = resp.StatusCode
-            resp.Body.Close()
+            response.StatusCode = http_response.StatusCode
+            // This will supposedly stop too many port errors
+            defer http_response.Body.Close()
         }
 
-        respObj.Duration = timer.Duration()
+        response.Duration = timer.Duration()
 
-        if len(responseChan) >= tc {
+        if len(response_channel) >= total_calls{
             break
         }
-        responseChan <- respObj
+        response_channel <- response
     }
 
 }

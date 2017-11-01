@@ -22,19 +22,19 @@ type Stats struct {
     Errors      int64
 }
 
-func CalcStats(responseChannel chan *Response, duration int64, url string) []byte {
+func CalcStats(response_channel chan *Response, duration int64, url string) []byte {
 
     stats := &Stats{
         Url:         url,
-        Connections: *numConnections,
-        Threads:     *numThreads,
-        Times:       make([]int, len(responseChannel)),
+        Connections: tps.Connections,
+        Threads:     tps.Threads,
+        Times:       make([]int, len(response_channel)),
         Duration:    float64(duration),
         AvgDuration: float64(duration),
     }
 
     i := 0
-    for res := range responseChannel {
+    for res := range response_channel {
         switch {
         case res.StatusCode < 200:
             // error
@@ -58,7 +58,7 @@ func CalcStats(responseChannel chan *Response, duration int64, url string) []byt
             stats.Errors++
         }
 
-        if len(responseChannel) == 0 {
+        if len(response_channel) == 0 {
             break
         }
     }
