@@ -1,6 +1,8 @@
-package main
+package stats
 
 import (
+    "github.com/kpister/go2wrk/structs" 
+
     "encoding/json"
     "sort"
     "fmt"
@@ -22,7 +24,7 @@ type Stats struct {
     Errors      int64
 }
 
-func CalcStats(response_channel chan *Response, duration float64, url string) []byte {
+func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, duration float64, url string) []byte {
 
     stats := &Stats{
         Url:         url,
@@ -65,7 +67,7 @@ func CalcStats(response_channel chan *Response, duration float64, url string) []
 
     sort.Float64s(stats.Times)
 
-    PrintStats(stats)
+    print_stats(stats)
     b, err := json.Marshal(&stats)
     if err != nil {
         fmt.Println(err)
@@ -73,7 +75,7 @@ func CalcStats(response_channel chan *Response, duration float64, url string) []
     return b
 }
 
-func PrintStats(allStats *Stats) {
+func print_stats(allStats *Stats) {
     sort.Float64s(allStats.Times)
     total := float64(len(allStats.Times))
     totalInt := int64(total)
@@ -84,16 +86,16 @@ func PrintStats(allStats *Stats) {
     fmt.Printf("Total number of calls:\t\t%d\n\n", totalInt)
     fmt.Println("===========================TIMINGS===========================")
     fmt.Printf("Total time passed:\t\t%.2fs\n", allStats.AvgDuration)
-    fmt.Printf("Avg time per request:\t\t%.2fms\n", allStats.Sum/total*1000)
+    fmt.Printf("Avg time per request:\t\t%.2fms\n", allStats.Sum/total*1e3)
     fmt.Printf("Requests per second:\t\t%.2f\n", total/(allStats.AvgDuration))
-    fmt.Printf("Median time per request:\t%.2fms\n", float64(allStats.Times[(totalInt-1)/2])*1000)
-    fmt.Printf("99th percentile time:\t\t%.2fms\n", float64(allStats.Times[(totalInt/100*99)])*1000)
-    fmt.Printf("Slowest time for request:\t%.2fms\n\n", float64(allStats.Times[totalInt-1]*1000))
+    fmt.Printf("Median time per request:\t%.2fms\n", float64(allStats.Times[(totalInt-1)/2])*1e3)
+    fmt.Printf("99th percentile time:\t\t%.2fms\n", float64(allStats.Times[(totalInt/100*99)])*1e3)
+    fmt.Printf("Slowest time for request:\t%.2fms\n\n", float64(allStats.Times[totalInt-1]*1e3))
     fmt.Println("=============================DATA=============================")
     fmt.Printf("Total response body sizes:\t\t%d\n", allStats.Transfered)
     fmt.Printf("Avg response body per request:\t\t%.2fms\n", float64(allStats.Transfered)/total)
     tr := float64(allStats.Transfered) / (allStats.AvgDuration )
-    fmt.Printf("Transfer rate per second:\t\t%.2f Byte/s (%.2f MByte/s)\n", tr, tr/1E6)
+    fmt.Printf("Transfer rate per second:\t\t%.2f Byte/s (%.2f MByte/s)\n", tr, tr/1e6)
     fmt.Println("==========================RESPONSES==========================")
     fmt.Printf("20X Responses:\t\t%d\t(%.2f%%)\n", allStats.Resp200, float64(allStats.Resp200)/total*1e2)
     fmt.Printf("30X Responses:\t\t%d\t(%.2f%%)\n", allStats.Resp300, float64(allStats.Resp300)/total*1e2)

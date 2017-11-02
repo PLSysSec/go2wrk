@@ -1,6 +1,8 @@
-package main
+package connection
 
 import (
+    "github.com/kpister/go2wrk/structs"
+
     "io/ioutil"
     "math/rand"
     "net/http"
@@ -9,7 +11,7 @@ import (
     "fmt"
 )
 
-func StartClient(tps TPSReport, response_channels []chan *Response, connection_start time.Time) {
+func Start(tps structs.TPSReport, response_channels []chan *structs.Response, connection_start time.Time) {
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
     ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
@@ -32,7 +34,7 @@ func StartClient(tps TPSReport, response_channels []chan *Response, connection_s
 
         request_start := time.Now()
         http_response, err := tps.Transport.RoundTrip(request)
-        response := &Response{}
+        response := &structs.Response{}
 
         if err != nil {
             response.Error = true
