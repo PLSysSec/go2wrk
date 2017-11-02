@@ -2,22 +2,27 @@ package main
 
 import (
     "io/ioutil"
+    "math/rand"
     "net/http"
     "strings"
-    "sync"
+    "time"
+    "fmt"
 )
 
-func StartClient(route Route, response_channel chan *Response, wait_group *sync.WaitGroup, total_calls int, transport *http.Transport) {
-    defer wait_group.Done()
+func StartClient(tps TPSReport, response_channels []chan *Response, connection_start time.Time) {
+    random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-    timer := NewTimer()
-    for {
+    ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
+    for range ticker.C {
+        index := random.Intn(len(tps.Routes)) // Generate random index
+        route := tps.Routes[index]
+
         request_body_reader := strings.NewReader(route.RequestBody)
         request, _ := http.NewRequest(route.Method, route.Url, request_body_reader)
-        header_pairs := strings.Split(route.Headers, "\n")
 
         // Split incoming header string by \n and build header pairs
         // TODO: Add counter increment to header
+        header_pairs := strings.Split(route.Headers, "\n")
         for i := range header_pairs {
             split := strings.SplitN(header_pairs[i], ":", 2)
             if len(split) == 2 {
@@ -25,9 +30,8 @@ func StartClient(route Route, response_channel chan *Response, wait_group *sync.
             }
         }
 
-        timer.Reset()
-
-        http_response, err := transport.RoundTrip(request)
+        request_start := time.Now()
+        http_response, err := tps.Transport.RoundTrip(request)
         response := &Response{}
 
         if err != nil {
@@ -46,12 +50,17 @@ func StartClient(route Route, response_channel chan *Response, wait_group *sync.
             defer http_response.Body.Close()
         }
 
-        response.Duration = timer.Duration()
+        response.Duration = time.Since(request_start).Seconds()
 
-        if len(response_channel) >= total_calls{
+        if time.Since(connection_start).Seconds() > tps.TestTime {
+            ticker.Stop() 
             break
         }
-        response_channel <- response
+
+        select {
+        case response_channels[index] <- response:
+            fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())
+        }
     }
 
 }

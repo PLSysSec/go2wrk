@@ -2,27 +2,20 @@ package main
 
 import (
     "encoding/json"
+    "io/ioutil"
+    "runtime"
     "flag"
     "fmt"
-    "io/ioutil"
     "os"
-    "runtime"
 )
 
-type TPSReport struct {
-    Routes []Route
-    TotalCalls int
-    Threads int
-    Connections int
-    Distro string // This could be a binary mapping instead
-}
 var (
     tps TPSReport
     threads = flag.Int("t", 0, "the numbers of threads used")
     connections = flag.Int("c", 0, "the max numbers of connections used")
-    total_calls = flag.Int("n", 0, "the total number of calls processed")
     distro = flag.String("d", "", "the distribution to hit different routes")
 
+    test_time = flag.Float64("s", 0.0, "the total runtime of the test calls")
     disable_keep_alives = flag.Bool("k", true, "if keep-alives are disabled")
     config_file = flag.String("f", "", "json config file")
     cert_file = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
@@ -41,6 +34,7 @@ func init() {
         os.Exit(1)
     }
     initialize_tps()
+
     // TODO handle no file error
     config_file := os.Args[len(os.Args)-1]
     if config_file != "" {
@@ -58,13 +52,17 @@ func initialize_tps() {
         tps.Connections = *connections
     }
 
-    if *total_calls != 0 {
-        tps.TotalCalls = *total_calls
-    }
-
     if *distro != "" {
         tps.Distro = *distro
     }
+
+    if *test_time != 0 {
+        tps.TestTime = *test_time
+    }
+
+    tps.Frequency = 2 
+
+    tps.Transport = SetTLS(*disable_keep_alives)
 }
 
 func read_config(config_file string) {
@@ -82,8 +80,18 @@ func main() {
     // warmup cache on first route
     // TODO: may want to make this more general in case Urls[0] is not always the first one hit
     fmt.Println("Warming up cache on route " + tps.Routes[0].Url)
-    Warmup(tps.Routes[0], 10, 1000)
+
+    warmup_tps := TPSReport{
+        Routes: append(make([]Route, 0), tps.Routes[0]),
+        Connections: 10,
+        Distro: "coin",
+        TestTime: 5.0,
+        Frequency: 2,
+        Transport: SetTLS(false),
+    }
+    SingleNode(warmup_tps, false)
     fmt.Println("Warmup complete")
 
-    SingleNode(tps)
+    fmt.Println("Starting testing")
+    SingleNode(tps, true)
 }

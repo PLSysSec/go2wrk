@@ -3,9 +3,9 @@ package main
 import (
 	"crypto/x509"
 	"crypto/tls"
+	"io/ioutil"
 	"net/http"
 	"log"
-	"io/ioutil"
 )
 
 func SetTLS(disable_keep_alives bool) *http.Transport {

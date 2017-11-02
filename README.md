@@ -37,6 +37,8 @@ A full list of flags:
     	A PEM eoncoded CA's certificate file. (default "someCertCAFile")
   -c int
     	the max numbers of connections used
+  -s float
+        the amount of time you want to test for (in seconds)
   -cert string
     	A PEM eoncoded certificate file. (default "someCertFile")
   -d string
@@ -48,8 +50,6 @@ A full list of flags:
   -k	if keep-alives are disabled (default true)
   -key string
     	A PEM encoded private key file. (default "someKeyFile")
-  -n int
-    	the total number of calls processed
   -t int
     	the numbers of threads used
 ```
@@ -69,7 +69,7 @@ A normal routes.json file will look something like the following:
             "Url": "https://route.com/b"
         }
     ],
-    "TotalCalls": 100,
+    "TestTime": 10.0,
     "Threads": 8,
     "Connections": 30,
     "Distro": "Coin"

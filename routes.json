@@ -8,8 +8,8 @@
             "Url": "https://students.ucsd.edu/academics/advising"
         }
     ],
-    "TotalCalls": 100,
+    "TestTime": 10.0,
     "Threads": 8,
-    "Connections": 30,
+    "Connections": 20,
     "Distro": "Coin"
 } 
