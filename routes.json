@@ -3,7 +3,7 @@
     [
         {
             "Url": "https://students.ucsd.edu",
-            "Dependencies":
+            "MandatoryDependencies":
             [
                 {
                     "Url": "https//kaiser.cloud"
