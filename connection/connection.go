@@ -49,7 +49,7 @@ func handle_response(http_response *http.Response, err bool) *structs.Response {
 }
 
 
-func Start(tps structs.TPSReport, response_channels []chan *structs.Response, connection_start time.Time, response_bootstrap *structs.Bootstrap) {
+func Start(tps structs.TPSReport, response_channels []chan *structs.Response, connection_start time.Time, response_bootstrap *structs.Bootstrap, boot_channel *chan float64) {
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
     ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
@@ -82,7 +82,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response, co
             // add response metric to bootstrap list and bootstrap
             response_bootstrap.Lock()
             response_bootstrap.MetricList = append(response_bootstrap.MetricList, response.Duration)
-            go stats.Bootstrap(response_bootstrap.MetricList, 100)
+            go stats.Bootstrap(response_bootstrap.MetricList, 100, boot_channel)
             response_bootstrap.Unlock()
 
             fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())

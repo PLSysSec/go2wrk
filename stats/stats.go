@@ -4,7 +4,9 @@ import (
     "github.com/kpister/go2wrk/structs"
 
     "encoding/json"
+    "math/rand"
     "sort"
+    "time"
     "fmt"
 )
 
@@ -25,9 +27,23 @@ type Stats struct {
 }
 
 // TODO: need to determine return type
-func Bootstrap(metrics_list []float64, samples int) bool {
-    //resamples := len(metrics_list)
-    return true
+func Bootstrap(metrics_list []float64, samples int, ch *chan float64) {
+    // basic bootstrapper that returns the average response time across samples
+    // DEFINITELY WANT TO CHANGE METRIC
+    random := rand.New(rand.NewSource(time.Now().UnixNano()))
+    total := 0.0
+
+    for i := 0; i < samples; i++ {
+        sample_total := 0.0
+
+        for j := 0; j < len(metrics_list); j++{
+            rand_ind := random.Intn(len(metrics_list))
+            sample_total += metrics_list[rand_ind]
+        }
+        total += sample_total / float64(len(metrics_list))
+    }
+
+    *ch <- (total / float64(samples))
 }
 
 func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, duration float64, url string) []byte {

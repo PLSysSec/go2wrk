@@ -19,11 +19,12 @@ func Run(tps structs.TPSReport, output bool) {
     response_bootstrap := structs.Bootstrap{
         MetricList: make([]float64, 0),
     }
+    boot_channel := make(chan float64)
 
     start := time.Now()
 
     for i := 0; i < tps.Connections; i++ {
-        go connection.Start(tps, channels, start, &response_bootstrap)
+        go connection.Start(tps, channels, start, &response_bootstrap, &boot_channel)
     }
 
     //time.Sleep(time.Duration(int(tps.TestTime + 1)) * time.Second)
