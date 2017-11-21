@@ -2,6 +2,7 @@ package connection
 
 import (
     "github.com/kpister/go2wrk/structs"
+    "github.com/kpister/go2wrk/stats"
 
     "io/ioutil"
     "math/rand"
@@ -48,7 +49,7 @@ func handle_response(http_response *http.Response, err bool) *structs.Response {
 }
 
 
-func Start(tps structs.TPSReport, response_channels []chan *structs.Response, connection_start time.Time) {
+func Start(tps structs.TPSReport, response_channels []chan *structs.Response, connection_start time.Time, response_bootstrap *structs.Bootstrap) {
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
     ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
@@ -70,6 +71,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response, co
 
         response.Duration = time.Since(request_start).Seconds()
 
+        // TODO: change this to break on some metric determined by bootstrapping
         if time.Since(connection_start).Seconds() > tps.TestTime {
             ticker.Stop() 
             break
@@ -77,6 +79,12 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response, co
 
         select {
         case response_channels[index] <- response:
+            // add response metric to bootstrap list and bootstrap
+            response_bootstrap.Lock()
+            response_bootstrap.MetricList = append(response_bootstrap.MetricList, response.Duration)
+            go stats.Bootstrap(response_bootstrap.MetricList, 100)
+            response_bootstrap.Unlock()
+
             fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())
         }
     }

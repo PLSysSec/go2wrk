@@ -1,7 +1,7 @@
 package stats
 
 import (
-    "github.com/kpister/go2wrk/structs" 
+    "github.com/kpister/go2wrk/structs"
 
     "encoding/json"
     "sort"
@@ -22,6 +22,12 @@ type Stats struct {
     Resp400     int64
     Resp500     int64
     Errors      int64
+}
+
+// TODO: need to determine return type
+func Bootstrap(metrics_list []float64, samples int) bool {
+    //resamples := len(metrics_list)
+    return true
 }
 
 func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, duration float64, url string) []byte {

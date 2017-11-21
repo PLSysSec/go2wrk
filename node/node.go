@@ -15,13 +15,18 @@ func Run(tps structs.TPSReport, output bool) {
         channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections * 10))
     }
 
+    // shared response metric collector and corresponding lock
+    response_bootstrap := structs.Bootstrap{
+        MetricList: make([]float64, 0),
+    }
+
     start := time.Now()
 
     for i := 0; i < tps.Connections; i++ {
-        go connection.Start(tps, channels, start)
+        go connection.Start(tps, channels, start, &response_bootstrap)
     }
 
-    time.Sleep(time.Duration(int(tps.TestTime + 1)) * time.Second)
+    //time.Sleep(time.Duration(int(tps.TestTime + 1)) * time.Second)
     fmt.Println()
 
     if output {
