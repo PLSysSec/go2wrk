@@ -71,17 +71,26 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response, co
 
         response.Duration = time.Since(request_start).Seconds()
 
-        // TODO: change this to break on some metric determined by bootstrapping
-        if time.Since(connection_start).Seconds() > tps.TestTime {
-            ticker.Stop() 
+        
+        //if time.Since(connection_start).Seconds() > tps.TestTime {
+        //    ticker.Stop() 
+        //   break
+        //}
+        
+        // if boot channel was closed, it's time to break
+        _, ok := <-(*boot_channel)
+        if !ok{
+            ticker.Stop()
             break
-        }
+        }   
 
         select {
         case response_channels[index] <- response:
+            // TODO: probably should only start bootstrapping after a significant # of responses are received
             // add response metric to bootstrap list and bootstrap
             response_bootstrap.Lock()
             response_bootstrap.MetricList = append(response_bootstrap.MetricList, response.Duration)
+            // TODO: user specify #samples they want
             go stats.Bootstrap(response_bootstrap.MetricList, 100, boot_channel)
             response_bootstrap.Unlock()
 

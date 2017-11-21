@@ -43,7 +43,14 @@ func Bootstrap(metrics_list []float64, samples int, ch *chan float64) {
         total += sample_total / float64(len(metrics_list))
     }
 
-    *ch <- (total / float64(samples))
+    metric := total / float64(samples)
+    *ch <- metric
+
+    // if avg response time below half second
+    // change this to better test later
+    if metric < 0.5 {
+        close(*ch)
+    }
 }
 
 func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, duration float64, url string) []byte {
