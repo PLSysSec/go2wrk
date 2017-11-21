@@ -1,30 +1,30 @@
-package main
+package https
 
 import (
 	"crypto/x509"
 	"crypto/tls"
+	"io/ioutil"
 	"net/http"
 	"log"
-	"io/ioutil"
 )
 
-func SetTLS(disable_keep_alives bool) *http.Transport {
+func SetTLS(disable_keep_alives, insecure bool, cert_file, key_file, ca_file string) *http.Transport {
 
 	var tls_config *tls.Config
 
-	if *insecure {
+	if insecure {
 		tls_config = &tls.Config{
 			InsecureSkipVerify: true,
 		}
 	} else {
 		// Load client cert
-		cert, err := tls.LoadX509KeyPair(*cert_file, *key_file)
+		cert, err := tls.LoadX509KeyPair(cert_file, key_file)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Load CA cert
-		ca_cert, err := ioutil.ReadFile(*ca_file)
+		ca_cert, err := ioutil.ReadFile(ca_file)
 		if err != nil {
 			log.Fatal(err)
 		}

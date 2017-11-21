@@ -2,14 +2,24 @@
     "Routes": 
     [
         {
-            "Url": "https://students.ucsd.edu"
+            "Url": "https://students.ucsd.edu",
+            "MandatoryDependencies":
+            [
+                {
+                    "Url": "https//kaiser.cloud"
+                },
+                {
+                    "Url": "https://kaiser.cloud/favicon.ico"
+                }
+
+            ]
         },
         {
             "Url": "https://students.ucsd.edu/academics/advising"
         }
     ],
-    "TotalCalls": 100,
+    "TestTime": 10.0,
     "Threads": 8,
-    "Connections": 30,
+    "Connections": 20,
     "Distro": "Coin"
 } 
