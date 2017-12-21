@@ -7,6 +7,5 @@
     ],
     "TestTime": 10.0,
     "Threads": 1,
-    "Connections": 10,
-    "Distro": "Coin"
+    "Connections": 10
 } 

@@ -18,7 +18,6 @@ var (
     tps structs.TPSReport
     threads = flag.Int("t", 0, "the numbers of threads used")
     connections = flag.Int("c", 0, "the max numbers of connections used")
-    distro = flag.String("d", "", "the distribution to hit different routes")
 
     test_time = flag.Float64("s", 0.0, "the total runtime of the test calls")
     disable_keep_alives = flag.Bool("k", true, "if keep-alives are disabled")
@@ -51,7 +50,6 @@ func init() {
 func initialize_tps() {
     if *threads != 0 { tps.Threads = *threads }
     if *connections != 0 { tps.Connections = *connections }
-    if *distro != "" { tps.Distro = *distro }
 
     tps.Frequency = 2 
     tps.Transport = https.SetTLS(*disable_keep_alives, *insecure, *cert_file, *key_file, *ca_file)
@@ -76,8 +74,7 @@ func main() {
     warmup_tps := structs.TPSReport{
         Routes: append(make([]structs.Route, 0), tps.Routes[0]),
         Connections: 10,
-        Distro: "coin",
-        TestTime: 5.0,
+        TestTime: 2.0,
         Frequency: 2,
         Transport: https.SetTLS(false, *insecure, *cert_file, *key_file, *ca_file),
     }

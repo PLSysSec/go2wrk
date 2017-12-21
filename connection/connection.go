@@ -13,15 +13,25 @@ import (
     "fmt"
 )
 
+// This starts a single connection to the app. It will hit multiple routes randomly
 func Start(tps structs.TPSReport, response_channels []chan *structs.Response, 
             connection_start time.Time, response_bootstrap *structs.Bootstrap, 
             boot_channel *chan float64, wait_group *sync.WaitGroup) {
     defer wait_group.Done()
+    done := false
 
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
+    // Send a request every 1/Frequency seconds (at fastest)
     ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
     for range ticker.C {
+        // if boot channel was closed, it's time to break
+        //_, ok := <-(*boot_channel)
+        if done{
+            ticker.Stop()
+            break
+        }   
+
         index := random.Intn(len(tps.Routes)) // Generate random index
         route := tps.Routes[index]
 
@@ -31,6 +41,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
         http_response, err := tps.Transport.RoundTrip(request)
         response := handle_response(http_response, err != nil)
 
+        // hit all the described dependencies in routes.json
         for _, dependency := range route.MandatoryDependencies {
             request := create_request(dependency)
             http_response, err := tps.Transport.RoundTrip(request)
@@ -39,18 +50,6 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
 
         response.Duration = time.Since(request_start).Seconds()
 
-        //if time.Since(connection_start).Seconds() > tps.TestTime {
-        //    ticker.Stop() 
-        //   break
-        //}
-        
-        // if boot channel was closed, it's time to break
-        _, ok := <-(*boot_channel)
-        if !ok{
-            ticker.Stop()
-            break
-        }   
-
         select {
         case response_channels[index] <- response:
             // TODO: probably should only start bootstrapping after a significant # of responses are received
@@ -58,10 +57,12 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
             response_bootstrap.Lock()
             response_bootstrap.MetricList = append(response_bootstrap.MetricList, response.Duration)
             // TODO: user specify #samples they want
-            go stats.Bootstrap(response_bootstrap.MetricList, 100, boot_channel)
+            done = stats.Bootstrap(response_bootstrap.MetricList, 100, boot_channel)
             response_bootstrap.Unlock()
 
             fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())
+        default:
+            done = true
         }
     }
 
@@ -98,6 +99,7 @@ func Warmup(tps structs.TPSReport, connection_start time.Time, wait_group *sync.
 
 // HELPER FUNCTIONS
 
+// Parses a request object and prepares it to be sent
 func create_request(route structs.Route) *http.Request {
     request_body_reader := strings.NewReader(route.RequestBody)
     request, _ := http.NewRequest(route.Method, route.Url, request_body_reader)
@@ -114,6 +116,7 @@ func create_request(route structs.Route) *http.Request {
     return request
 }
 
+// Parses the response and returns it to caller
 func handle_response(http_response *http.Response, err bool) *structs.Response {
     response := &structs.Response{}
     if err {

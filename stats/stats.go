@@ -27,7 +27,7 @@ type Stats struct {
 }
 
 // TODO: need to determine return type
-func Bootstrap(metrics_list []float64, samples int, ch *chan float64) {
+func Bootstrap(metrics_list []float64, samples int, ch *chan float64) bool{
     // basic bootstrapper that returns the average response time across samples
     // DEFINITELY WANT TO CHANGE METRIC
     random := rand.New(rand.NewSource(time.Now().UnixNano()))
@@ -44,13 +44,15 @@ func Bootstrap(metrics_list []float64, samples int, ch *chan float64) {
     }
 
     metric := total / float64(samples)
-    *ch <- metric
+    //*ch <- metric
 
     // if avg response time below half second
     // change this to better test later
     if metric < 0.5 {
-        close(*ch)
+        //close(*ch)
+        return true
     }
+    return false
 }
 
 func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, duration float64, url string) []byte {
