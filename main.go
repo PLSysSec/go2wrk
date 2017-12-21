@@ -44,7 +44,8 @@ func init() {
     }
 
     initialize_tps()
-    runtime.GOMAXPROCS(tps.Threads)
+    fmt.Println(runtime.GOMAXPROCS(tps.Threads))
+    fmt.Println(runtime.NumCPU())
 }
 
 func initialize_tps() {
@@ -80,9 +81,9 @@ func main() {
         Frequency: 2,
         Transport: https.SetTLS(false, *insecure, *cert_file, *key_file, *ca_file),
     }
-    node.Run(warmup_tps, false)
+    node.Warmup(warmup_tps)
     fmt.Println("Warmup complete")
 
     fmt.Println("Starting testing")
-    node.Run(tps, true)
+    node.Run(tps)
 }
