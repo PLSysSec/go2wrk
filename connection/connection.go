@@ -15,8 +15,7 @@ import (
 
 // This starts a single connection to the app. It will hit multiple routes randomly
 func Start(tps structs.TPSReport, response_channels []chan *structs.Response, 
-            connection_start time.Time, response_bootstrap *structs.Bootstrap, 
-            boot_channel *chan float64, wait_group *sync.WaitGroup) {
+            connection_start time.Time, metrics *structs.Bootstrap, wait_group *sync.WaitGroup) {
     defer wait_group.Done()
     done := false
 
@@ -27,7 +26,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
     for range ticker.C {
         // if boot channel was closed, it's time to break
         //_, ok := <-(*boot_channel)
-        if done{
+        if done {
             ticker.Stop()
             break
         }   
@@ -52,13 +51,12 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
 
         select {
         case response_channels[index] <- response:
-            // TODO: probably should only start bootstrapping after a significant # of responses are received
-            // add response metric to bootstrap list and bootstrap
-            response_bootstrap.Lock()
-            response_bootstrap.MetricList = append(response_bootstrap.MetricList, response.Duration)
-            // TODO: user specify #samples they want
-            done = stats.Bootstrap(response_bootstrap.MetricList, 100, boot_channel)
-            response_bootstrap.Unlock()
+            metrics.List = append(metrics.List, response.Duration)
+            if len(metrics.List) > tps.Samples {
+                // add response metric to bootstrap list and bootstrap
+                // TODO: user specify #samples they want
+                done = stats.Bootstrap(metrics, tps.Samples)
+            }
 
             fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())
         default:

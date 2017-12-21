@@ -16,10 +16,10 @@ import (
 
 var (
     tps structs.TPSReport
-    threads = flag.Int("t", 0, "the numbers of threads used")
     connections = flag.Int("c", 0, "the max numbers of connections used")
+    samples = flag.Int("s", 0, "the max numbers of connections used")
 
-    test_time = flag.Float64("s", 0.0, "the total runtime of the test calls")
+    test_time = flag.Float64("t", 0.0, "the total runtime of the test calls")
     disable_keep_alives = flag.Bool("k", true, "if keep-alives are disabled")
     cert_file = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
     key_file = flag.String("key", "someKeyFile", "A PEM encoded private key file.")
@@ -43,12 +43,12 @@ func init() {
     }
 
     initialize_tps()
-    fmt.Println(runtime.GOMAXPROCS(tps.Threads))
-    fmt.Println(runtime.NumCPU())
+    //fmt.Println(runtime.GOMAXPROCS(tps.Threads))
+    //fmt.Println(runtime.NumCPU())
 }
 
 func initialize_tps() {
-    if *threads != 0 { tps.Threads = *threads }
+    if *samples != 0 { tps.Samples = *samples }
     if *connections != 0 { tps.Connections = *connections }
 
     tps.Frequency = 2 

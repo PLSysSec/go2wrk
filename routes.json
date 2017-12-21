@@ -6,6 +6,6 @@
         }
     ],
     "TestTime": 10.0,
-    "Threads": 1,
-    "Connections": 10
+    "Connections": 10,
+    "Samples": 100
 } 

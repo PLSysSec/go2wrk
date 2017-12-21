@@ -4,5 +4,5 @@ import "sync"
 
 type Bootstrap struct {
 	sync.Mutex
-	MetricList []float64
+	List []float64
 }
