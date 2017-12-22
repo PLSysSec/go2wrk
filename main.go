@@ -19,6 +19,7 @@ var (
     connections = flag.Int("c", 0, "the max numbers of connections used")
     samples = flag.Int("s", 0, "the max numbers of connections used")
 
+    config_file = flag.String("f", "routes.json", "the file to read routes from")
     test_time = flag.Float64("t", 0.0, "the total runtime of the test calls")
     disable_keep_alives = flag.Bool("k", true, "if keep-alives are disabled")
     cert_file = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
@@ -36,15 +37,8 @@ func init() {
         flag.PrintDefaults()
         os.Exit(1)
     }
-    // TODO handle no file error
-    config_file := os.Args[len(os.Args)-1]
-    if config_file != "" {
-        read_config(config_file)
-    }
-
+    read_config(*config_file)
     initialize_tps()
-    //fmt.Println(runtime.GOMAXPROCS(tps.Threads))
-    //fmt.Println(runtime.NumCPU())
 }
 
 func initialize_tps() {

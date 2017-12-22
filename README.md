@@ -24,12 +24,14 @@ go build        // alternatively use go install if you have set your $GOPATH
 ```
 You now should have an executable which you can run
 ```
-./go2wrk [flags] routes.json
+./go2wrk [flags] 
 ```
 The design philosophy we follow is that any configuration pertaining to the multiple routes should be configured from within the json file, while the app-wide features should be flags. 
 
 A full list of flags:
 ```
+  -f string
+        The file name for the route descriptions. A json file
   -CA string
     	A PEM eoncoded CA's certificate file. (default "someCertCAFile")
   -c int
