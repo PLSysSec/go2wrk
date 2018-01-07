@@ -7,7 +7,6 @@ import (
 
     "encoding/json"
     "io/ioutil"
-    "runtime"
     "flag"
     "fmt"
     "os"

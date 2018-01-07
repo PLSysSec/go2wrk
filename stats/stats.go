@@ -28,7 +28,7 @@ type Stats struct {
 }
 
 // TODO: need to determine return type
-func Bootstrap(metrics *structs.Bootstrap, samples int) bool{
+func Bootstrap(metrics *structs.Bootstrap, samples int, latency float64) bool{
     defer metrics.Unlock()
     metrics.Lock()
 
@@ -48,7 +48,7 @@ func Bootstrap(metrics *structs.Bootstrap, samples int) bool{
 
     // if s_d response time below half millisecond
     fmt.Printf("standard dev: %f\n", b_standard_deviation)
-    if b_standard_deviation < 0.004 {
+    if b_standard_deviation < latency {
         return true
     }
     return false
@@ -76,7 +76,6 @@ func Calculate(tps structs.TPSReport, response_channel chan *structs.Response, d
     stats := &Stats{
         Url:         url,
         Connections: tps.Connections,
-        Threads:     tps.Threads,
         Times:       make([]float64, len(response_channel)),
         Duration:    duration, // In seconds
         AvgDuration: duration, // In seconds

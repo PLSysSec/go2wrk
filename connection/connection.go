@@ -55,7 +55,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
             if len(metrics.List) > tps.Samples {
                 // add response metric to bootstrap list and bootstrap
                 // TODO: user specify #samples they want
-                done = stats.Bootstrap(metrics, tps.Samples)
+                done = stats.Bootstrap(metrics, tps.Samples, tps.Latency)
             }
 
             fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connection_start).Seconds())
