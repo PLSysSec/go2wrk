@@ -8,9 +8,6 @@ go2wrk sends requests according to a given probability distribution. The simples
 
 ### TODO
 
-* - [ ] Build the distro model
-    * - [ ] Decide what distributions we want
-    * - [ ] https://en.wikipedia.org/wiki/Traffic_generation_model#Poisson_traffic_model
 * - [ ] IDs in the Headers
     * - [ ] Create ids in the headers
     * - [ ] Figure out how we are using these on the end game
@@ -27,17 +24,19 @@ go build        // alternatively use go install if you have set your $GOPATH
 ```
 You now should have an executable which you can run
 ```
-./go2wrk [flags] routes.json
+./go2wrk [flags] 
 ```
 The design philosophy we follow is that any configuration pertaining to the multiple routes should be configured from within the json file, while the app-wide features should be flags. 
 
 A full list of flags:
 ```
+  -f string
+        The file name for the route descriptions. A json file
   -CA string
     	A PEM eoncoded CA's certificate file. (default "someCertCAFile")
   -c int
     	the max numbers of connections used
-  -s float
+  -t float
         the amount of time you want to test for (in seconds)
   -cert string
     	A PEM eoncoded certificate file. (default "someCertFile")
@@ -50,8 +49,6 @@ A full list of flags:
   -k	if keep-alives are disabled (default true)
   -key string
     	A PEM encoded private key file. (default "someKeyFile")
-  -t int
-    	the numbers of threads used
 ```
 
 A normal routes.json file will look something like the following:
