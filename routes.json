@@ -7,5 +7,6 @@
     ],
     "TestTime": 10.0,
     "Connections": 10,
-    "Samples": 100
+    "Samples": 100,
+    "Latency": 0.004
 } 
