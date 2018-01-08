@@ -111,6 +111,7 @@ func create_request(route structs.Route) *http.Request {
             request.Header.Set(split[0], split[1])
         }
     }
+    request.Header.Set("go_time", time.Now().String())
     return request
 }
 
