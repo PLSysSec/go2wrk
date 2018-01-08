@@ -8,9 +8,9 @@ go2wrk sends requests according to a given probability distribution. The simples
 
 ### TODO
 
-* - [ ] IDs in the Headers
-    * - [ ] Create ids in the headers
-    * - [ ] Figure out how we are using these on the end game
+* - [x] IDs in the Headers
+    * - [x] Create ids in the headers
+    * - [x] Figure out how we are using these on the end game
 * - [ ] TLS
     * - [ ] Actually get the tls stuff working -- get those certs?
     * - [ ] Add to readme the steps needed for that
