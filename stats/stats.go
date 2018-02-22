@@ -11,12 +11,12 @@ import (
     "os"
 )
 
-func Export(response_channel chan *structs.Response, url string) {
+func Export(response_channel chan *structs.Response, pos int, url string) {
     // open a file
-    data_file, _ := os.Create("output_" + url + ".data")
+    data_file, _ := os.Create("output_" + strconv.Itoa(pos) + ".data")
     defer data_file.Close()
 
-    output := ""
+    output := url + "\n"
 
     for response := range response_channel {
         // print (time, latency)

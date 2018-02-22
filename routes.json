@@ -3,7 +3,11 @@
     [
         {
             "Url": "http://localhost:9292"
+        },
+        {
+            "Url": "http://localhost:9292/abc"
         }
+
     ],
     "TestTime": 90.0,
     "Connections": 10,

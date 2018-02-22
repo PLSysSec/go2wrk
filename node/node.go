@@ -5,7 +5,6 @@ import (
     "github.com/kpister/go2wrk/structs"
     "github.com/kpister/go2wrk/stats"
 
-    "strconv"
     "time"
     "sync"
     "fmt"
@@ -42,14 +41,10 @@ func Run(tps structs.TPSReport) {
 
     wait_group.Wait()
     fmt.Println()
-    fmt.Print("Done with that")
 
-    //duration := time.Since(start).Seconds()
-
-    for i, _ := range tps.Routes {
+    for i, route := range tps.Routes {
         close(channels[i])
-        //stats.Calculate(tps, channels[i], duration, route.Url)
-        stats.Export(channels[i], strconv.Itoa(i))
+        stats.Export(channels[i], i, route.Url)
     }
     fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }
