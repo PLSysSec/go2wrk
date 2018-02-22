@@ -21,7 +21,7 @@ func Warmup(tps structs.TPSReport) {
     fmt.Println()
 }
 
-func Run(tps structs.TPSReport) {
+func Run(tps structs.TPSReport, output_dir string) {
     var channels []chan *structs.Response
     for i := 0; i < len(tps.Routes); i++ {
         channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections * 10))
@@ -44,7 +44,7 @@ func Run(tps structs.TPSReport) {
 
     for i, route := range tps.Routes {
         close(channels[i])
-        stats.Export(channels[i], i, route.Url)
+        stats.Export(channels[i], i, route.Url, output_dir)
     }
     fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }
