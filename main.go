@@ -10,7 +10,6 @@ import (
     "flag"
     "fmt"
     "os"
-    
 )
 
 var (
@@ -44,7 +43,7 @@ func initialize_tps() {
     if *samples != 0 { tps.Samples = *samples }
     if *connections != 0 { tps.Connections = *connections }
 
-    tps.Frequency = 2 
+    //tps.Frequency = 4
     tps.Transport = https.SetTLS(*disable_keep_alives, *insecure, *cert_file, *key_file, *ca_file)
 }
 
@@ -68,7 +67,7 @@ func main() {
         Routes: append(make([]structs.Route, 0), tps.Routes[0]),
         Connections: 10,
         TestTime: 2.0,
-        Frequency: 2,
+        Frequency: 4,
         Transport: https.SetTLS(false, *insecure, *cert_file, *key_file, *ca_file),
     }
     node.Warmup(warmup_tps)

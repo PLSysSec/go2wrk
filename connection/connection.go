@@ -14,7 +14,7 @@ import (
 )
 
 // This starts a single connection to the app. It will hit multiple routes randomly
-func Start(tps structs.TPSReport, response_channels []chan *structs.Response, 
+func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
             connection_start time.Time, metrics *structs.Bootstrap, wait_group *sync.WaitGroup) {
     defer wait_group.Done()
     done := false
@@ -29,7 +29,7 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
         if done {
             ticker.Stop()
             break
-        }   
+        }
 
         index := random.Intn(len(tps.Routes)) // Generate random index
         route := tps.Routes[index]
@@ -47,7 +47,8 @@ func Start(tps structs.TPSReport, response_channels []chan *structs.Response,
             handle_response(http_response, err != nil)
         }
 
-        response.Duration = time.Since(request_start).Seconds()
+        response.Start = request_start
+        response.Duration = time.Since(request_start).Nanoseconds()
 
         select {
         case response_channels[index] <- response:
@@ -87,7 +88,7 @@ func Warmup(tps structs.TPSReport, connection_start time.Time, wait_group *sync.
 
         // warmups run for a set period of time (different from normal benchmarking)
         if time.Since(connection_start).Seconds() > tps.TestTime {
-            ticker.Stop() 
+            ticker.Stop()
             break
         }
 

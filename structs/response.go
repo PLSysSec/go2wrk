@@ -1,8 +1,10 @@
 package structs
+import "time"
 
 type Response struct {
-    Size       int64
-    Duration   float64
-    StatusCode int
+    Duration   int64
     Error      bool
+    Size       int64
+    Start      time.Time
+    StatusCode int
 }

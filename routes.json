@@ -5,8 +5,9 @@
             "Url": "http://localhost:9292"
         }
     ],
-    "TestTime": 10.0,
+    "TestTime": 90.0,
     "Connections": 10,
-    "Samples": 100,
-    "Latency": 0.004
+    "Samples": 1000,
+    "Latency": 20000000,
+    "Frequency": 4
 } 
