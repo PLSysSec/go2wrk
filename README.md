@@ -32,31 +32,31 @@ go build        // alternatively use go install if you have set your $GOPATH
 ```
 You now should have an executable which you can run
 ```
-./go2wrk [flags] 
+./go2wrk [flags]        // with empty args, the program defaults to routes.json
 ```
 The design philosophy we follow is that any configuration pertaining to the multiple routes should be configured from within the json file, while the app-wide features should be flags. 
 
 A full list of flags:
 ```
+  -h	for usage
   -f string
-        The file name for the route descriptions. A json file
-  -CA string
-    	A PEM eoncoded CA's certificate file. (default "someCertCAFile")
+        The file name for the route descriptions. A json file (default: "routes.json")
+  -o string
+        The output directory for the graph data (default: current directory)
   -c int
     	the max numbers of connections used
+  -s int
+    	the numbers of samples to bootstrap on
   -t float
         the amount of time you want to test for (in seconds)
   -cert string
-    	A PEM eoncoded certificate file. (default "someCertFile")
-  -d string
-    	the distribution to hit different routes
-  -f string
-    	json config file
-  -h	for usage
-  -i	TLS checks are disabled (default true)
-  -k	if keep-alives are disabled (default true)
+    	A PEM eoncoded certificate file. (default: "someCertFile")
+  -i	TLS checks are disabled (default: true)
+  -k	if keep-alives are disabled (default: true)
   -key string
-    	A PEM encoded private key file. (default "someKeyFile")
+    	A PEM encoded private key file. (default: "someKeyFile")
+  -CA string
+    	A PEM eoncoded CA's certificate file. (default: "someCertCAFile")
 ```
 
 A normal routes.json file will look something like the following:
@@ -69,15 +69,19 @@ A normal routes.json file will look something like the following:
             "Headers": ""                           //optional
             "Method": "Get"                         //optional
             "RequestBody": ""                       //optional
+            "MandatoryDependencies":[               //optional
+                // More urls
+            ]
         },
         {
             "Url": "https://route.com/b"
         }
     ],
     "TestTime": 10.0,
-    "Threads": 8,
     "Connections": 30,
-    "Distro": "Coin"
+    "Samples":1000,
+    "Latency":1000,
+    "Frequency":4
 } 
 ```
 
@@ -86,8 +90,7 @@ A normal routes.json file will look something like the following:
 
 This Software is licensed under the MIT License.
 
-Copyright (c) 2013 adeven GmbH,
-http://www.adeven.com
+This Software was originally based on work done by Github user adjust: https://github.com/adjust/go-wrk
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
