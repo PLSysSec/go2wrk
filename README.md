@@ -8,9 +8,17 @@ go2wrk sends requests according to a given probability distribution. The simples
 
 ### TODO
 
-* - [x] IDs in the Headers
-    * - [x] Create ids in the headers
-    * - [x] Figure out how we are using these on the end game
+* - [ ] Update Readme
+* - [ ] Look into bootstrapping
+    * - [ ] make it async with a bool flag if done
+    * - [ ] make sure it actually is working
+    * - [ ] make it a flag
+* - [ ] Add graph making code to repo in clean way
+* - [ ] Compare to Autocannon
+* - [ ] Build/explore node apps to test on
+* - [ ] look into other performance stats other than GC
+    * - [ ] Cache (in some way other than `perf`)
+    * - [ ] ...
 * - [ ] TLS
     * - [ ] Actually get the tls stuff working -- get those certs?
     * - [ ] Add to readme the steps needed for that
