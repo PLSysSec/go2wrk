@@ -13,17 +13,16 @@ import (
 )
 
 var (
-	tps         structs.TPSReport
-	connections = flag.Int("c", 0, "the max numbers of connections used")
-	samples     = flag.Int("s", 0, "the max numbers of connections used")
-
-	configFile         = flag.String("f", "routes.json", "the file to read routes from")
-	outputDirectory          = flag.String("o", "", "the output directory to work with")
-	testTime           = flag.Float64("t", 0.0, "the total runtime of the test calls")
-	disableKeepAlives = flag.Bool("k", true, "if keep-alives are disabled")
-	certFile           = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
-	keyFile            = flag.String("key", "someKeyFile", "A PEM encoded private key file.")
-	caFile             = flag.String("CA", "someCertCAFile", "A PEM eoncoded CA's certificate file.")
+	tps                 structs.TPSReport
+	connections         = flag.Int("c", 0, "the max numbers of connections used")
+	samples             = flag.Int("s", 0, "the max numbers of connections used")
+	configFile          = flag.String("f", "routes.json", "the file to read routes from")
+	outputDirectory     = flag.String("o", "", "the output directory to work with")
+	testTime            = flag.Float64("t", 0.0, "the total runtime of the test calls")
+	disableKeepAlives   = flag.Bool("k", true, "if keep-alives are disabled")
+	certFile            = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
+	keyFile             = flag.String("key", "someKeyFile", "A PEM encoded private key file.")
+	caFile              = flag.String("CA", "someCertCAFile", "A PEM eoncoded CA's certificate file.")
 	insecure            = flag.Bool("i", true, "TLS checks are disabled")
 	help                = flag.Bool("h", false, "for usage")
 )
