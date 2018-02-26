@@ -2,6 +2,7 @@ package structs
 
 import "net/http"
 
+// TPSReport is a struct that contains the config file information.
 type TPSReport struct {
 	Routes      []Route
 	Samples     int

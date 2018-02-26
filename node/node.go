@@ -10,20 +10,23 @@ import (
 	"time"
 )
 
+// Warmup performs a short warmup on the server. These response are not recorded.
 func Warmup(tps structs.TPSReport) {
-	wait_group := &sync.WaitGroup{}
+	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
 	for i := 0; i < tps.Connections; i++ {
-		go connection.Warmup(tps, start, wait_group)
-		wait_group.Add(1)
+		go connection.Warmup(tps, start, waitGroup)
+		waitGroup.Add(1)
 	}
-	wait_group.Wait()
+	waitGroup.Wait()
 	fmt.Println()
 }
 
-func Run(tps structs.TPSReport, output_dir string) {
+// Run will create connections that fire requests at the server. Then it creates the output. 
+func Run(tps structs.TPSReport, outputDirectory string) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
+                // TODO make this number meaningful
 		channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections*10))
 	}
 
@@ -31,20 +34,20 @@ func Run(tps structs.TPSReport, output_dir string) {
 	metrics := structs.Bootstrap{
 		List: make([]int64, 0),
 	}
-	wait_group := &sync.WaitGroup{}
+	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
 
 	for i := 0; i < tps.Connections; i++ {
-		go connection.Start(tps, channels, start, &metrics, wait_group)
-		wait_group.Add(1)
+		go connection.Start(tps, channels, start, &metrics, waitGroup)
+		waitGroup.Add(1)
 	}
 
-	wait_group.Wait()
+	waitGroup.Wait()
 	fmt.Println()
 
 	for i, route := range tps.Routes {
 		close(channels[i])
-		stats.Export(channels[i], i, route.Url, output_dir)
+		stats.Export(channels[i], i, route.Url, outputDirectory)
 	}
 	fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }
