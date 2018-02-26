@@ -21,7 +21,6 @@ func Export(responseChannel chan *structs.Response, pos int, url string, outputD
 	dataFile, _ := os.Create(outputDirectory + "output_" + strconv.Itoa(pos) + ".data")
 	defer dataFile.Close()
 
-
 	output := url + "\n"
 
 	for response := range responseChannel {
@@ -53,13 +52,13 @@ func Bootstrap(metrics *structs.Bootstrap, samples int, latency float64) bool {
 	// if s_d response time below half millisecond
 	fmt.Printf("standard dev: %f\n", bootstrapStandardDeviation)
 	if bootstrapStandardDeviation < latency {
-                return true // TODO: set a bootstrap struct var to true -- this will determine if done for everyone
+		return true // TODO: set a bootstrap struct var to true -- this will determine if done for everyone
 	}
 	return false
 }
 
 func getBootstrapMean(metricsList []int64, random *rand.Rand) float64 {
-	var mean int64 = 0
+	var mean int64
 	for i := 0; i < len(metricsList); i++ {
 		index := random.Intn(len(metricsList))
 		mean += metricsList[index]

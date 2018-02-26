@@ -22,11 +22,11 @@ func Warmup(tps structs.TPSReport) {
 	fmt.Println()
 }
 
-// Run will create connections that fire requests at the server. Then it creates the output. 
+// Run will create connections that fire requests at the server. Then it creates the output.
 func Run(tps structs.TPSReport, outputDirectory string) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
-                // TODO make this number meaningful
+		// TODO make this number meaningful
 		channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections*10))
 	}
 
