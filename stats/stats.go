@@ -12,13 +12,14 @@ import (
 )
 
 func Export(response_channel chan *structs.Response, pos int, url string, output_dir string) {
+	if output_dir != "" && string(output_dir[len(output_dir)-1]) != "/" {
+		output_dir += "/"
+	}
+
 	// open a file
 	data_file, _ := os.Create(output_dir + "output_" + strconv.Itoa(pos) + ".data")
 	defer data_file.Close()
 
-	if output_dir != "" && string(output_dir[len(output_dir)-1]) != "/" {
-		output_dir += "/"
-	}
 
 	output := url + "\n"
 
