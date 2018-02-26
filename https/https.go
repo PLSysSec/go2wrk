@@ -1,11 +1,11 @@
 package https
 
 import (
-	"crypto/x509"
 	"crypto/tls"
+	"crypto/x509"
 	"io/ioutil"
-	"net/http"
 	"log"
+	"net/http"
 )
 
 func SetTLS(disable_keep_alives, insecure bool, cert_file, key_file, ca_file string) *http.Transport {
