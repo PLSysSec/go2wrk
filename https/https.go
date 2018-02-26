@@ -1,45 +1,46 @@
 package https
 
 import (
-	"crypto/x509"
 	"crypto/tls"
+	"crypto/x509"
 	"io/ioutil"
-	"net/http"
 	"log"
+	"net/http"
 )
 
-func SetTLS(disable_keep_alives, insecure bool, cert_file, key_file, ca_file string) *http.Transport {
+// SetTLS sets the TLS for a server. We want to look into this more.
+func SetTLS(disableKeepAlives, insecure bool, certFile, keyFile, caFile string) *http.Transport {
 
-	var tls_config *tls.Config
+	var tlsConfig *tls.Config
 
 	if insecure {
-		tls_config = &tls.Config{
+		tlsConfig = &tls.Config{
 			InsecureSkipVerify: true,
 		}
 	} else {
 		// Load client cert
-		cert, err := tls.LoadX509KeyPair(cert_file, key_file)
+		cert, err := tls.LoadX509KeyPair(certFile, keyFile)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// Load CA cert
-		ca_cert, err := ioutil.ReadFile(ca_file)
+		caCert, err := ioutil.ReadFile(caFile)
 		if err != nil {
 			log.Fatal(err)
 		}
-		ca_cert_pool := x509.NewCertPool()
-		ca_cert_pool.AppendCertsFromPEM(ca_cert)
+		caCertPool := x509.NewCertPool()
+		caCertPool.AppendCertsFromPEM(caCert)
 
 		// Setup HTTPS client
-		tls_config = &tls.Config{
+		tlsConfig = &tls.Config{
 			Certificates: []tls.Certificate{cert},
-			RootCAs:      ca_cert_pool,
+			RootCAs:      caCertPool,
 		}
-		tls_config.BuildNameToCertificate()
+		tlsConfig.BuildNameToCertificate()
 	}
 
-	transport := &http.Transport{TLSClientConfig: tls_config, DisableKeepAlives: disable_keep_alives}
+	transport := &http.Transport{TLSClientConfig: tlsConfig, DisableKeepAlives: disableKeepAlives}
 
 	return transport
 }
