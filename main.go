@@ -10,7 +10,6 @@ import (
     "flag"
     "fmt"
     "os"
-    
 )
 
 var (
@@ -19,6 +18,7 @@ var (
     samples = flag.Int("s", 0, "the max numbers of connections used")
 
     config_file = flag.String("f", "routes.json", "the file to read routes from")
+    output_dir = flag.String("o", "", "the output directory to work with")
     test_time = flag.Float64("t", 0.0, "the total runtime of the test calls")
     disable_keep_alives = flag.Bool("k", true, "if keep-alives are disabled")
     cert_file = flag.String("cert", "someCertFile", "A PEM eoncoded certificate file.")
@@ -44,7 +44,7 @@ func initialize_tps() {
     if *samples != 0 { tps.Samples = *samples }
     if *connections != 0 { tps.Connections = *connections }
 
-    tps.Frequency = 2 
+    //tps.Frequency = 4
     tps.Transport = https.SetTLS(*disable_keep_alives, *insecure, *cert_file, *key_file, *ca_file)
 }
 
@@ -68,12 +68,12 @@ func main() {
         Routes: append(make([]structs.Route, 0), tps.Routes[0]),
         Connections: 10,
         TestTime: 2.0,
-        Frequency: 2,
+        Frequency: 4,
         Transport: https.SetTLS(false, *insecure, *cert_file, *key_file, *ca_file),
     }
     node.Warmup(warmup_tps)
     fmt.Println("Warmup complete")
 
     fmt.Println("Starting testing")
-    node.Run(tps)
+    node.Run(tps, *output_dir)
 }

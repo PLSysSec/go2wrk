@@ -16,12 +16,12 @@ func Warmup(tps structs.TPSReport) {
     for i := 0; i < tps.Connections; i++ {
         go connection.Warmup(tps, start, wait_group)
         wait_group.Add(1)
-    } 
+    }
     wait_group.Wait()
-    fmt.Println()    
+    fmt.Println()
 }
 
-func Run(tps structs.TPSReport) {
+func Run(tps structs.TPSReport, output_dir string) {
     var channels []chan *structs.Response
     for i := 0; i < len(tps.Routes); i++ {
         channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections * 10))
@@ -29,7 +29,7 @@ func Run(tps structs.TPSReport) {
 
     // shared response metric collector and corresponding lock
     metrics := structs.Bootstrap{
-        List: make([]float64, 0),
+        List: make([]int64, 0),
     }
     wait_group := &sync.WaitGroup{}
     start := time.Now()
@@ -42,10 +42,9 @@ func Run(tps structs.TPSReport) {
     wait_group.Wait()
     fmt.Println()
 
-    duration := time.Since(start).Seconds()
-
     for i, route := range tps.Routes {
-        stats.Calculate(tps, channels[i], duration, route.Url)
+        close(channels[i])
+        stats.Export(channels[i], i, route.Url, output_dir)
     }
     fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }
