@@ -12,6 +12,6 @@
     "TestTime": 90.0,
     "Connections": 10,
     "Samples": 1000,
-    "Latency": 20000000,
+    "EndPercentage": 0.05,
     "Frequency": 4
 } 

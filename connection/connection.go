@@ -1,7 +1,6 @@
 package connection
 
 import (
-	"github.com/kpister/go2wrk/stats"
 	"github.com/kpister/go2wrk/structs"
 
 	"fmt"
@@ -51,19 +50,12 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 
 		select {
 		case responseChannels[index] <- response:
-			metrics.List = append(metrics.List, response.Duration)
-			if len(metrics.List) > tps.Samples {
-				// add response metric to bootstrap list and bootstrap
-				// TODO: user specify #samples they want
-				done = stats.Bootstrap(metrics, tps.Samples, tps.Latency)
-			}
-
-			fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connectionStart).Seconds())
+			done = metrics.AddResponse(response.Duration)
+			fmt.Printf("Sending requests: %.2f seconds\n", time.Since(connectionStart).Seconds())
 		default:
 			done = true
 		}
 	}
-
 }
 
 // Warmup is used to warm up a route before we start recording results.
@@ -103,7 +95,6 @@ func createRequest(route structs.Route) *http.Request {
 	request, _ := http.NewRequest(route.Method, route.Url, requestBodyReader)
 
 	// Split incoming header string by \n and build header pairs
-	// TODO: Add counter increment to header
 	headerPairs := strings.Split(route.Headers, "\n")
 	for i := range headerPairs {
 		split := strings.SplitN(headerPairs[i], ":", 2)

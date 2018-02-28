@@ -33,6 +33,9 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 	// shared response metric collector and corresponding lock
 	metrics := structs.Bootstrap{
 		List: make([]int64, 0),
+		Converged: false,
+		Samples: tps.Samples,
+		EndPercentage: tps.EndPercentage,
 	}
 	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
@@ -41,6 +44,7 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 		go connection.Start(tps, channels, start, &metrics, waitGroup)
 		waitGroup.Add(1)
 	}
+	go (&metrics).Start() // start bootstrapping
 
 	waitGroup.Wait()
 	fmt.Println()
