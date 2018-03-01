@@ -3,12 +3,10 @@
     [
         {
             "Url": "http://localhost:9292"
-        },
-        {
-            "Url": "http://localhost:9292/abc"
         }
 
     ],
+    "InitRoute": "http://localhost:9292/init",
     "TestTime": 90.0,
     "Connections": 10,
     "Samples": 1000,

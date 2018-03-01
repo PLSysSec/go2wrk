@@ -7,6 +7,7 @@ type TPSReport struct {
 	Routes        []Route
 	Samples       int
 	Connections   int
+	InitRoute     string
 	TestTime      float64
 	Frequency     float64
 	EndPercentage float64

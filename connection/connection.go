@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -51,7 +52,7 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 		select {
 		case responseChannels[index] <- response:
 			done = metrics.AddResponse(response.Duration)
-			fmt.Printf("Sending requests: %.2f seconds\n", time.Since(connectionStart).Seconds())
+			fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
 		default:
 			done = true
 		}
@@ -83,8 +84,14 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 			break
 		}
 
-		fmt.Printf("Sending requests: %.2f seconds\r", time.Since(connectionStart).Seconds())
+		fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
 	}
+}
+
+// Init will calibrate the app's timer
+func Init(tps structs.TPSReport) {
+	route := structs.Route{Url: tps.InitRoute}
+	tps.Transport.RoundTrip(createRequest(route))
 }
 
 // HELPER FUNCTIONS
@@ -102,7 +109,7 @@ func createRequest(route structs.Route) *http.Request {
 			request.Header.Set(split[0], split[1])
 		}
 	}
-	request.Header.Set("go_time", time.Now().String())
+	request.Header.Set("go_time", strconv.FormatInt(time.Now().UnixNano()/1000, 10))
 	return request
 }
 
