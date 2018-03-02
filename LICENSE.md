@@ -1,5 +1,3 @@
-## License
-
 This Software is licensed under the MIT License.
 
 This Software was originally based on work done by Github user adjust: https://github.com/adjust/go-wrk
