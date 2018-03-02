@@ -27,7 +27,7 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
 		// TODO make this number meaningful
-		channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections*10))
+		channels = append(channels, make(chan *structs.Response, int64(tps.MaxTestTime*tps.Frequency)*int64(tps.Connections)))
 	}
 
 	// shared response metric collector and corresponding lock

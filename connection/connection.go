@@ -79,7 +79,7 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 		}
 
 		// warmups run for a set period of time (different from normal benchmarking)
-		if time.Since(connectionStart).Seconds() > tps.TestTime {
+		if time.Since(connectionStart).Seconds() > tps.MaxTestTime {
 			ticker.Stop()
 			break
 		}

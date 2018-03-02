@@ -8,7 +8,7 @@ type TPSReport struct {
 	Samples       int
 	Connections   int
 	InitRoute     string
-	TestTime      float64
+	MaxTestTime   float64
 	Frequency     float64
 	EndPercentage float64
 	Transport     *http.Transport

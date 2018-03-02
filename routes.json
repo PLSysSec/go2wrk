@@ -7,7 +7,7 @@
 
     ],
     "InitRoute": "http://localhost:9292/init",
-    "TestTime": 90.0,
+    "MaxTestTime": 90.0,
     "Connections": 10,
     "Samples": 1000,
     "EndPercentage": 0.05,

@@ -69,7 +69,7 @@ func main() {
 	warmupTPS := structs.TPSReport{
 		Routes:      append(make([]structs.Route, 0), tps.Routes[0]),
 		Connections: 10,
-		TestTime:    2.0,
+		MaxTestTime: 2.0,
 		Frequency:   4,
 		Transport:   https.SetTLS(false, *insecure, *certFile, *keyFile, *caFile),
 	}
