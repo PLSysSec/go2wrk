@@ -3,15 +3,13 @@
     [
         {
             "Url": "http://localhost:9292"
-        },
-        {
-            "Url": "http://localhost:9292/abc"
         }
 
     ],
-    "TestTime": 90.0,
+    "InitRoute": "http://localhost:9292/init",
+    "MaxTestTime": 90.0,
     "Connections": 10,
     "Samples": 1000,
-    "Latency": 20000000,
+    "EndPercentage": 0.05,
     "Frequency": 4
 } 

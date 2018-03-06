@@ -27,20 +27,26 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
 		// TODO make this number meaningful
-		channels = append(channels, make(chan *structs.Response, int(tps.TestTime)*tps.Connections*10))
+		channels = append(channels, make(chan *structs.Response, int64(tps.MaxTestTime*tps.Frequency)*int64(tps.Connections)))
 	}
 
 	// shared response metric collector and corresponding lock
 	metrics := structs.Bootstrap{
-		List: make([]int64, 0),
+		List:          make([]int64, 0),
+		Converged:     false,
+		Samples:       tps.Samples,
+		EndPercentage: tps.EndPercentage,
 	}
 	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
+
+	connection.Init(tps)
 
 	for i := 0; i < tps.Connections; i++ {
 		go connection.Start(tps, channels, start, &metrics, waitGroup)
 		waitGroup.Add(1)
 	}
+	go (&metrics).Start() // start bootstrapping
 
 	waitGroup.Wait()
 	fmt.Println()
