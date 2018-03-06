@@ -1,18 +1,18 @@
 package structs
 
 import (
-	"sync"
 	"math"
 	"math/rand"
+	"sync"
 	"time"
 )
 
 // Bootstrap is a struct that stores the latencies of all the responses.
 type Bootstrap struct {
 	sync.RWMutex
-	List []int64
-	Converged bool
-	Samples int
+	List          []int64
+	Converged     bool
+	Samples       int
 	EndPercentage float64
 }
 
@@ -20,7 +20,7 @@ type Bootstrap struct {
 func (bootstrap *Bootstrap) AddResponse(duration int64) bool {
 	defer bootstrap.RUnlock()
 	bootstrap.RLock()
-	
+
 	bootstrap.List = append(bootstrap.List, duration)
 	return bootstrap.Converged
 }
@@ -31,12 +31,12 @@ func (bootstrap *Bootstrap) Start() {
 	ticker := time.NewTicker(time.Second / 2.0)
 	for range ticker.C {
 		bootstrap.Lock()
-		bootstrap.Converged = tick(*bootstrap)
+		bootstrap.Converged = tick(bootstrap)
 		bootstrap.Unlock()
 	}
 }
 
-func tick(bootstrap Bootstrap) bool {
+func tick(bootstrap *Bootstrap) bool {
 	// only start bootstrapping after the specified number of responses
 	if len(bootstrap.List) < bootstrap.Samples {
 		return false
