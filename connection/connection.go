@@ -33,10 +33,12 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 		index := random.Intn(len(tps.Routes)) // Generate random index
 		route := tps.Routes[index]
 
-		request := createRequest(route)
+		//request := createRequest(route)
 
 		requestStart := time.Now()
-		httpResponse, err := tps.Transport.RoundTrip(request)
+        //httpResponse, err := tps.Transport.RoundTrip(request)
+        httpResponse, err := http.Get(route.Url)
+        duration := time.Since(requestStart).Nanoseconds()
 		response := handleResponse(httpResponse, err != nil)
 
 		// hit all the described dependencies in routes.json
@@ -47,7 +49,7 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 		}
 
 		response.Start = requestStart
-		response.Duration = time.Since(requestStart).Nanoseconds()
+		response.Duration = duration
 
 		select {
 		case responseChannels[index] <- response:

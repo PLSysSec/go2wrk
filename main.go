@@ -4,6 +4,7 @@ import (
 	"github.com/kpister/go2wrk/https"
 	"github.com/kpister/go2wrk/node"
 	"github.com/kpister/go2wrk/structs"
+	"github.com/kpister/go2wrk/connection"
 
 	"encoding/json"
 	"flag"
@@ -46,7 +47,6 @@ func initializeTPS() {
 		tps.Connections = *connections
 	}
 
-	//tps.Frequency = 4
 	tps.Transport = https.SetTLS(*disableKeepAlives, *insecure, *certFile, *keyFile, *caFile)
 }
 
@@ -69,7 +69,7 @@ func main() {
 	warmupTPS := structs.TPSReport{
 		Routes:      append(make([]structs.Route, 0), tps.Routes[0]),
 		Connections: 10,
-		MaxTestTime: 2.0,
+		MaxTestTime: 4.0,
 		Frequency:   4,
 		Transport:   https.SetTLS(false, *insecure, *certFile, *keyFile, *caFile),
 	}
@@ -77,5 +77,13 @@ func main() {
 	fmt.Println("Warmup complete")
 
 	fmt.Println("Starting testing")
-	node.Run(tps, *outputDirectory)
+    connection.Init(tps)
+    if tps.BreakMe {
+        for ; tps.Connections < tps.MaxConnections; tps.Connections *= 2 {
+            node.Run(tps, *outputDirectory, tps.Connections)
+            tps.Samples *=2
+        }
+    } else {
+        node.Run(tps, *outputDirectory, 0)
+    }
 }

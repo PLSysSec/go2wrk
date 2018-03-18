@@ -23,7 +23,7 @@ func Warmup(tps structs.TPSReport) {
 }
 
 // Run will create connections that fire requests at the server. Then it creates the output.
-func Run(tps structs.TPSReport, outputDirectory string) {
+func Run(tps structs.TPSReport, outputDirectory string, outputIteration int) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
 		// TODO make this number meaningful
@@ -40,7 +40,7 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
 
-	connection.Init(tps)
+	// connection.Init(tps)
 
 	for i := 0; i < tps.Connections; i++ {
 		go connection.Start(tps, channels, start, &metrics, waitGroup)
@@ -53,7 +53,7 @@ func Run(tps structs.TPSReport, outputDirectory string) {
 
 	for i, route := range tps.Routes {
 		close(channels[i])
-		stats.Export(channels[i], i, route.Url, outputDirectory)
+		stats.Export(channels[i], i, outputIteration, route.Url, outputDirectory)
 	}
 	fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }

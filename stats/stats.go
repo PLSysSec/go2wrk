@@ -8,13 +8,13 @@ import (
 )
 
 // Export is a function that outputs the time of response and latency for each request.
-func Export(responseChannel chan *structs.Response, pos int, url string, outputDirectory string) {
+func Export(responseChannel chan *structs.Response, pos, iter int, url string, outputDirectory string) {
 	if outputDirectory != "" && string(outputDirectory[len(outputDirectory)-1]) != "/" {
 		outputDirectory += "/"
 	}
 
 	// open a file
-	dataFile, _ := os.Create(outputDirectory + "output_" + strconv.Itoa(pos) + ".data")
+	dataFile, _ := os.Create(outputDirectory + "output_" + strconv.Itoa(iter) + "_" + strconv.Itoa(pos) + ".data")
 	defer dataFile.Close()
 
 	output := url + "\n"
