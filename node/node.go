@@ -5,6 +5,8 @@ import (
 	"github.com/kpister/go2wrk/stats"
 	"github.com/kpister/go2wrk/structs"
 
+	fishStructs "github.com/streddy/go-fish/structs"
+
 	"fmt"
 	"sync"
 	"time"
@@ -24,10 +26,10 @@ func Warmup(tps structs.TPSReport) {
 
 // Run will create connections that fire requests at the server. Then it creates the output.
 func Run(tps structs.TPSReport, outputDirectory string) {
-	var channels []chan *structs.Response
+	var channels []chan *fishStructs.Response
 	for i := 0; i < len(tps.Routes); i++ {
 		// TODO make this number meaningful
-		channels = append(channels, make(chan *structs.Response, int64(tps.MaxTestTime*tps.Frequency)*int64(tps.Connections)))
+		channels = append(channels, make(chan *fishStructs.Response, int64(tps.MaxTestTime*tps.Frequency)*int64(tps.Connections)))
 	}
 
 	// shared response metric collector and corresponding lock

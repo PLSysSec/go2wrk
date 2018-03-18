@@ -4,6 +4,7 @@ import (
 	"github.com/kpister/go2wrk/https"
 	"github.com/kpister/go2wrk/node"
 	"github.com/kpister/go2wrk/structs"
+	fishStructs "github.com/streddy/go-fish/structs"
 
 	"encoding/json"
 	"flag"
@@ -67,7 +68,7 @@ func main() {
 	fmt.Println("Warming up cache on route " + tps.Routes[0].Url)
 
 	warmupTPS := structs.TPSReport{
-		Routes:      append(make([]structs.Route, 0), tps.Routes[0]),
+		Routes:      append(make([]fishStructs.Route, 0), tps.Routes[0]),
 		Connections: 10,
 		MaxTestTime: 2.0,
 		Frequency:   4,
@@ -76,6 +77,7 @@ func main() {
 	node.Warmup(warmupTPS)
 	fmt.Println("Warmup complete")
 
+	// TODO: continue integrating here
 	fmt.Println("Starting testing")
 	node.Run(tps, *outputDirectory)
 }

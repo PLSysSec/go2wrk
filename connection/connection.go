@@ -3,6 +3,9 @@ package connection
 import (
 	"github.com/kpister/go2wrk/structs"
 
+	fishStructs "github.com/streddy/go-fish/structs"
+	"github.com/streddy/go-fish"
+
 	"fmt"
 	"io/ioutil"
 	"math/rand"
@@ -14,11 +17,35 @@ import (
 )
 
 // Start starts a single connection to the app. It will hit multiple routes randomly
-func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
+func Start(tps structs.TPSReport, responseChannels []chan *fishStructs.Response,
 	connectionStart time.Time, metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
-	done := false
 
+	done := false
+	trafficParams := fishStructs.TackleBox{
+		Transport:	tps.Transport,
+		Frequency:	tps.Frequency,
+		Routes:		tps.Routes,	
+		MinLatency:	tps.MinLatency,
+		MaxLatency:	tps.MaxLatency,
+		DropFreq:	tps.DropFreq,
+	}
+
+	go gofish.GoFish(trafficParams, responseChannels, &done)
+
+	for !done {
+		for i, _ := range responseChannels {
+			select {
+			case response, ok := <-responseChannels[i]
+				if ok {
+					done = metrics.AddResponse(response.Duration)
+					fmt.Printf("Sending requests: %.1f seconds\r",
+								time.Since(connectionStart).Seconds())
+				}
+			}
+		}
+	}
+/*
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Send a request every 1/Frequency seconds (at fastest)
@@ -57,8 +84,10 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 			done = true
 		}
 	}
+*/
 }
 
+// TODO: modify gofish to support warmup, then integrate
 // Warmup is used to warm up a route before we start recording results.
 func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
