@@ -1,4 +1,5 @@
-# go2wrk
+![](logos/go2wrk_text_away2.png "go2wrk")
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/kpister/go2wrk)](https://goreportcard.com/report/github.com/kpister/go2wrk)
 
 A simpler, more meaningful benchmarking app modeled after go-wrk and wrk. This project is designed to stress test web apps in ways similar to organic internet traffic.
