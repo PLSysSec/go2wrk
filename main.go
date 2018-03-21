@@ -25,7 +25,8 @@ var (
 	caFile            = flag.String("CA", "someCertCAFile", "A PEM eoncoded CA's certificate file.")
 	disableKeepAlives = flag.Bool("k", true, "if keep-alives are disabled")
 	insecure          = flag.Bool("i", true, "TLS checks are disabled")
-	useTransport	  = flag.Bool("ut", false, "TLS functionality disabled")
+	//TODO: uncomment once support has been added for both roundtrip and get
+	//useTransport	  = flag.Bool("ut", false, "TLS functionality disabled")
 	help              = flag.Bool("h", false, "for usage")
 )
 
@@ -47,10 +48,13 @@ func initializeTPS() {
 	if *connections != 0 {
 		tps.Connections = *connections
 	}
+/* TODO: uncomment once support has been added for roundtrip and get
 	if *useTransport != false {
 		tps.UseTransport = *useTransport
 		tps.Transport = https.SetTLS(*disableKeepAlives, *insecure, *certFile, *keyFile, *caFile)
 	}
+*/
+	tps.Transport = https.SetTLS(*disableKeepAlives, *insecure, *certFile, *keyFile, *caFile)
 }
 
 func readConfig(configFile string) {
