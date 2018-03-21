@@ -18,4 +18,5 @@ type TPSReport struct {
 	DropFreq      float64
 	EndPercentage float64
 	Transport     *http.Transport
+	UseTransport  bool
 }

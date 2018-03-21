@@ -25,13 +25,14 @@ func Start(tps structs.TPSReport, responseChannels []chan *fishStructs.Response,
 	trafficParams := fishStructs.TackleBox{
 		Transport:	tps.Transport,
 		Frequency:	tps.Frequency,
-		Routes:		tps.Routes,	
+		Routes:		tps.Routes,
 		MinLatency:	tps.MinLatency,
 		MaxLatency:	tps.MaxLatency,
 		DropFreq:	tps.DropFreq,
+		UseTrans:	tps.UseTransport,
 	}
 
-	go gofish.GoFish(trafficParams, responseChannels, &done)
+	go gofish.Freestyle(trafficParams, responseChannels, &done)
 
 	for !done {
 		for i, _ := range responseChannels {
@@ -45,7 +46,7 @@ func Start(tps structs.TPSReport, responseChannels []chan *fishStructs.Response,
 			}
 		}
 	}
-/*
+/*	OLD START
 	random := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Send a request every 1/Frequency seconds (at fastest)
@@ -87,11 +88,29 @@ func Start(tps structs.TPSReport, responseChannels []chan *fishStructs.Response,
 */
 }
 
-// TODO: modify gofish to support warmup, then integrate
-// Warmup is used to warm up a route before we start recording results.
+// Warmup is used to warm up a route before we start recording results
 func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 
+	trafficParams := fishStructs.TackleBox{
+		Transport:	tps.Transport,
+		Frequency:	tps.Frequency,
+		Routes:		tps.Routes,
+		UseTrans:	tps.UseTransport,
+	}
+
+	done := false
+	go gofish.Warmup(trafficParams, &done)
+	
+	for !done {
+		if time.Since(connectionStart).Seconds() > tps.MaxTestTime {
+			done := true
+			break
+		} else {
+			fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
+		}
+	}
+/*	OLD WARMUP
 	// Send a request every 1/Frequency seconds (at fastest)
 	ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
 	for range ticker.C {
@@ -115,12 +134,22 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 
 		fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
 	}
+*/
 }
 
 // Init will calibrate the app's timer
 func Init(tps structs.TPSReport) {
-	route := structs.Route{Url: tps.InitRoute}
-	tps.Transport.RoundTrip(createRequest(route))
+	route := fishStructs.Route{
+		Url:		tps.InitRoute,
+		Headers:	"go_time:" + strconv.FormatInt(time.Now().UnixNano()/1000, 10),
+	}
+
+	trafficParams := fishStructs.TackleBox{
+		Transport:	tps.Transport,
+		Routes:		[route]
+	}
+
+	gofish.OneFish(trafficParams)
 }
 
 // HELPER FUNCTIONS
