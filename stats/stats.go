@@ -1,14 +1,14 @@
 package stats
 
 import (
-	"github.com/kpister/go2wrk/structs"
+	fishStructs "github.com/streddy/go-fish/structs"
 
 	"os"
 	"strconv"
 )
 
 // Export is a function that outputs the time of response and latency for each request.
-func Export(responseChannel chan *structs.Response, pos int, url string, outputDirectory string) {
+func Export(responseChannel chan *fishStructs.Response, pos int, url string, outputDirectory string) {
 	if outputDirectory != "" && string(outputDirectory[len(outputDirectory)-1]) != "/" {
 		outputDirectory += "/"
 	}

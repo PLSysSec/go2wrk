@@ -8,7 +8,6 @@ import (
 
 	"fmt"
 	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -37,7 +36,7 @@ func Start(tps structs.TPSReport, responseChannels []chan *fishStructs.Response,
 	for !done {
 		for i, _ := range responseChannels {
 			select {
-			case response, ok := <-responseChannels[i]
+			case response, ok := <-responseChannels[i]:
 				if ok {
 					done = metrics.AddResponse(response.Duration)
 					fmt.Printf("Sending requests: %.1f seconds\r",
@@ -104,7 +103,7 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 	
 	for !done {
 		if time.Since(connectionStart).Seconds() > tps.MaxTestTime {
-			done := true
+			done = true
 			break
 		} else {
 			fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
@@ -141,12 +140,12 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 func Init(tps structs.TPSReport) {
 	route := fishStructs.Route{
 		Url:		tps.InitRoute,
-		Headers:	"go_time:" + strconv.FormatInt(time.Now().UnixNano()/1000, 10),
+		Headers:	"go_time",
 	}
 
 	trafficParams := fishStructs.TackleBox{
 		Transport:	tps.Transport,
-		Routes:		[route]
+		Routes:		[]fishStructs.Route{route},
 	}
 
 	gofish.OneFish(trafficParams)
