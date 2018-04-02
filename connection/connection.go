@@ -14,6 +14,7 @@ import (
 )
 
 // Start starts a single connection to the app. It will hit multiple routes randomly
+// needs to take threshold and tails
 func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 	connectionStart time.Time, metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
@@ -53,6 +54,8 @@ func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
 
 		select {
 		case responseChannels[index] <- response:
+			// if response.Duration > threshold ... 
+				// tails.AddResponse(response.Duration)
 			done = metrics.AddResponse(response.Duration)
 			fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
 		default:
@@ -87,6 +90,7 @@ func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.Wa
 		}
 
 		fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
+		// this should return results struct for stats to happen
 	}
 }
 

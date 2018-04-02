@@ -73,9 +73,17 @@ func main() {
 		Frequency:   4,
 		Transport:   https.SetTLS(false, *insecure, *certFile, *keyFile, *caFile),
 	}
+	// Calculate the 99% by storing results := node.Warmup
 	node.Warmup(warmupTPS)
 	fmt.Println("Warmup complete")
+	// Perform some stats on results
+	// tails, threshold := stats.Perform(results)
+	// Tails is our bootstrap struct, threshold is the latency to be in the 99th percentile
 
+	// Start bootstrapping here on tails
+	// tails.bootstrap()
+
+	// node.Run will now need to add to tails if response latency > threshold
 	fmt.Println("Starting testing")
     connection.Init(tps)
     if tps.BreakMe {

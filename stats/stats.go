@@ -25,3 +25,5 @@ func Export(responseChannel chan *structs.Response, pos, iter int, url string, o
 	}
 	dataFile.WriteString(output)
 }
+
+// Perform will take results, and find a definition of tail latency on that group. It will return the threshold and an empty bootstrap struct tails.
