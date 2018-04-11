@@ -11,14 +11,16 @@ import (
 )
 
 // Warmup performs a short warmup on the server. These response are not recorded.
-func Warmup(tps structs.TPSReport) {
+func Warmup(tps structs.TPSReport, index int) {
 	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
+	channel := make(chan *structs.Response, int64(4*tps.Frequency)*int64(tps.Connections))
 	for i := 0; i < tps.Connections; i++ {
-		go connection.Warmup(tps, start, waitGroup)
+		go connection.Start(tps.Routes[index], tps.Frequency, channel, start, nil, waitGroup)
 		waitGroup.Add(1)
 	}
 	waitGroup.Wait()
+	close(channel)
 	fmt.Println()
 }
 
@@ -27,11 +29,9 @@ func Warmup(tps structs.TPSReport) {
 func Run(tps structs.TPSReport, outputDirectory string, outputIteration int) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
-		// we might not need this anymore
 		channels = append(channels, make(chan *structs.Response, int64(tps.MaxTestTime*tps.Frequency)*int64(tps.Connections)))
 	}
 
-	// we might not need this anymore
 	// shared response metric collector and corresponding lock
 	metrics := structs.Bootstrap{
 		List:          make([]int64, 0),
@@ -42,11 +42,9 @@ func Run(tps structs.TPSReport, outputDirectory string, outputIteration int) {
 	waitGroup := &sync.WaitGroup{}
 	start := time.Now()
 
-	// connection.Init(tps)
-
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
-		go connection.Start(tps, channels, start, &metrics, waitGroup)
+		go connection.Start(tps.Routes[i%len(tps.Routes)], tps.Frequency, channels[i%len(tps.Routes)], start, &metrics, waitGroup)
 		waitGroup.Add(1)
 	}
 	// doing this in main

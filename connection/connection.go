@@ -3,9 +3,6 @@ package connection
 import (
 	"github.com/kpister/go2wrk/structs"
 
-	"fmt"
-	"io/ioutil"
-	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -15,82 +12,34 @@ import (
 
 // Start starts a single connection to the app. It will hit multiple routes randomly
 // needs to take threshold and tails
-func Start(tps structs.TPSReport, responseChannels []chan *structs.Response,
+func Start(route structs.Route, freq float64, responseChannel chan *structs.Response,
 	connectionStart time.Time, metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	done := false
 
-	random := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	// Send a request every 1/Frequency seconds (at fastest)
-	ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
+	ticker := time.NewTicker(time.Second / time.Duration(freq))
 	for range ticker.C {
-		// if boot channel was closed, it's time to break
 		if done {
 			ticker.Stop()
 			break
 		}
 
-		index := random.Intn(len(tps.Routes)) // Generate random index
-		route := tps.Routes[index]
-
-		//request := createRequest(route)
-
 		requestStart := time.Now()
-        //httpResponse, err := tps.Transport.RoundTrip(request)
-        httpResponse, err := http.Get(route.Url)
+        http.Get(route.Url)
         duration := time.Since(requestStart).Nanoseconds()
-		response := handleResponse(httpResponse, err != nil)
-
-		// hit all the described dependencies in routes.json
-		for _, dependency := range route.MandatoryDependencies {
-			request := createRequest(dependency)
-			httpResponse, err := tps.Transport.RoundTrip(request)
-			handleResponse(httpResponse, err != nil)
+		response := &structs.Response{
+			Start: requestStart,
+			Duration: duration,
 		}
 
-		response.Start = requestStart
-		response.Duration = duration
-
 		select {
-		case responseChannels[index] <- response:
-			// if response.Duration > threshold ... 
-				// tails.AddResponse(response.Duration)
-			done = metrics.AddResponse(response.Duration)
-			fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
+		case responseChannel <- response:
+			if metrics != nil {
+				done = metrics.AddResponse(response.Duration)
+			}
 		default:
 			done = true
 		}
-	}
-}
-
-// Warmup is used to warm up a route before we start recording results.
-func Warmup(tps structs.TPSReport, connectionStart time.Time, waitGroup *sync.WaitGroup) {
-	defer waitGroup.Done()
-
-	// Send a request every 1/Frequency seconds (at fastest)
-	ticker := time.NewTicker(time.Second / time.Duration(tps.Frequency))
-	for range ticker.C {
-		route := tps.Routes[0]
-		request := createRequest(route) // warmup the first route
-		httpResponse, err := tps.Transport.RoundTrip(request)
-		handleResponse(httpResponse, err != nil)
-
-		// hit all the described dependencies in routes.json
-		for _, dependency := range route.MandatoryDependencies {
-			request := createRequest(dependency)
-			httpResponse, err := tps.Transport.RoundTrip(request)
-			handleResponse(httpResponse, err != nil)
-		}
-
-		// warmups run for a set period of time (different from normal benchmarking)
-		if time.Since(connectionStart).Seconds() > tps.MaxTestTime {
-			ticker.Stop()
-			break
-		}
-
-		fmt.Printf("Sending requests: %.1f seconds\r", time.Since(connectionStart).Seconds())
-		// this should return results struct for stats to happen
 	}
 }
 
@@ -117,25 +66,4 @@ func createRequest(route structs.Route) *http.Request {
 	}
 	request.Header.Set("go_time", strconv.FormatInt(time.Now().UnixNano()/1000, 10))
 	return request
-}
-
-// Parses the response and returns it to caller
-func handleResponse(httpResponse *http.Response, err bool) *structs.Response {
-	response := &structs.Response{}
-	if err {
-		response.Error = true
-	} else {
-		if httpResponse.ContentLength < 0 { // -1 if the length is unknown
-			content, err := ioutil.ReadAll(httpResponse.Body)
-			if err == nil {
-				response.Size = int64(len(content))
-			}
-		} else {
-			response.Size = httpResponse.ContentLength
-		}
-		response.StatusCode = httpResponse.StatusCode
-		defer httpResponse.Body.Close()
-	}
-
-	return response
 }

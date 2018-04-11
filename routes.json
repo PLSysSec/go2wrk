@@ -10,10 +10,10 @@
     ],
     "InitRoute": "http://localhost:9292/init",
     "MaxTestTime": 300.0,
-    "Connections": 10,
-    "Samples": 1000,
+    "Connections": 2000,
+    "Samples": 200000,
     "EndPercentage": 0.03,
-    "Frequency": 16,
-    "BreakMe":true,
-    "MaxConnections":5000
+    "Frequency": 24,
+    "BreakMe":false,
+    "MaxConnections":4000
 } 
