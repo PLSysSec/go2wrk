@@ -3,34 +3,39 @@ package connection
 import (
 	"github.com/kpister/go2wrk/structs"
 
+	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 )
 
 // Start starts a single connection to the app. It will hit multiple routes randomly
 // needs to take threshold and tails
-func Start(route structs.Route, freq float64, responseChannel chan *structs.Response,
-	connectionStart time.Time, metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
+func Start(client *http.Client, route structs.Route, freq float64, responseChannel chan *structs.Response,
+	metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	done := false
 
-	ticker := time.NewTicker(time.Second / time.Duration(freq))
-	for range ticker.C {
+	//ticker := time.NewTicker(time.Second / time.Duration(freq))
+	for {
 		if done {
-			ticker.Stop()
 			break
 		}
 
 		requestStart := time.Now()
-        http.Get(route.Url)
+		res, err := client.Get(route.Url)
         duration := time.Since(requestStart).Nanoseconds()
+		if err != nil{
+			panic(err)
+			continue
+		}
 		response := &structs.Response{
 			Start: requestStart,
 			Duration: duration,
 		}
+		ioutil.ReadAll(res.Body)
+		res.Body.Close()
 
 		select {
 		case responseChannel <- response:
@@ -45,25 +50,9 @@ func Start(route structs.Route, freq float64, responseChannel chan *structs.Resp
 
 // Init will calibrate the app's timer
 func Init(tps structs.TPSReport) {
-	route := structs.Route{Url: tps.InitRoute}
-	tps.Transport.RoundTrip(createRequest(route))
-}
-
-// HELPER FUNCTIONS
-
-// Parses a request object and prepares it to be sent
-func createRequest(route structs.Route) *http.Request {
-	requestBodyReader := strings.NewReader(route.RequestBody)
-	request, _ := http.NewRequest(route.Method, route.Url, requestBodyReader)
-
-	// Split incoming header string by \n and build header pairs
-	headerPairs := strings.Split(route.Headers, "\n")
-	for i := range headerPairs {
-		split := strings.SplitN(headerPairs[i], ":", 2)
-		if len(split) == 2 {
-			request.Header.Set(split[0], split[1])
-		}
-	}
-	request.Header.Set("go_time", strconv.FormatInt(time.Now().UnixNano()/1000, 10))
-	return request
+	//requestBodyReader := strings.NewReader("")
+	request, _ := http.NewRequest("Get", tps.InitRoute, nil)
+	request.Header.Set("go_time", strconv.FormatInt(time.Now().UnixNano()/1000,10))
+	res, _ := http.DefaultClient.Do(request)
+	res.Body.Close()
 }

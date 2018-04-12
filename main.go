@@ -3,13 +3,13 @@ package main
 import (
 	"github.com/kpister/go2wrk/node"
 	"github.com/kpister/go2wrk/structs"
-	"github.com/kpister/go2wrk/connection"
 
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"syscall"
 )
 
 var (
@@ -27,6 +27,8 @@ func init() {
 		os.Exit(1)
 	}
 	readConfig(*configFile)
+
+	setRLimit()
 }
 
 func readConfig(configFile string) {
@@ -42,8 +44,24 @@ func readConfig(configFile string) {
 
 func main() {
 	fmt.Println("Warming up cache on route " + tps.Routes[0].Url)
-	node.Warmup(tps, 0)
+	tailThreshold := node.Warmup(tps, 0)
+	fmt.Printf("Threshold Found %d\n", tailThreshold)
 	fmt.Println("Warmup complete")
-    connection.Init(tps)
-	node.Run(tps, *outputDirectory, 0)
+    //connection.Init(tps)
+	node.Barrage(tps, *outputDirectory, 0)
+}
+
+// From peterSO on Stack Exchange
+func setRLimit(){
+	var rLimit syscall.Rlimit
+	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+	if err != nil {
+		fmt.Println("Error Getting Rlimit ", err)
+	}
+	rLimit.Max = 999999
+	rLimit.Cur = 999999
+	err = syscall.Setrlimit(syscall.RLIMIT_NOFILE, &rLimit)
+	if err != nil {
+		fmt.Println("Error Setting Rlimit ", err)
+	}
 }
