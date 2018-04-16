@@ -7,12 +7,11 @@ import (
 
 	"time"
 	"net/http"
-	"fmt"
 	"sync"
 )
 
 // Warmup performs a short warmup on the server. 
-func Warmup(tps structs.TPSReport, index int) int64{
+func Warmup(tps structs.TPSReport, index int) (int, int){
 	waitGroup := &sync.WaitGroup{}
 	warmupData := make(chan *structs.Response, 100 * int64(tps.Connections))
 
@@ -22,7 +21,7 @@ func Warmup(tps structs.TPSReport, index int) int64{
 	}
 	client := &http.Client{Transport: tr}
 	for i := 0; i < tps.Connections; i++ {
-		go connection.Start(client, tps.Routes[index], tps.Frequency, warmupData, nil, waitGroup)
+		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, warmupData, nil, waitGroup)
 		waitGroup.Add(1)
 	}
 	waitGroup.Wait()
@@ -53,19 +52,18 @@ func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int)
 
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
-		go connection.Start(client, tps.Routes[i%len(tps.Routes)], tps.Frequency, channels[i%len(tps.Routes)], &metrics, waitGroup)
+		go connection.Start(tps, client, tps.Routes[i%len(tps.Routes)], tps.Frequency, channels[i%len(tps.Routes)], &metrics, waitGroup)
 		waitGroup.Add(1)
 	}
 	// doing this in main
 	go (&metrics).Start() // start bootstrapping
-
 	waitGroup.Wait()
-	fmt.Println()
+	tps.Logger.Kill()
+	tps.Logger.Queue("Saving responses to disk")
 
 	for i, route := range tps.Routes {
 		close(channels[i])
 		// update export to deal with tails
 		stats.Export(channels[i], i, outputIteration, route.Url, outputDirectory)
 	}
-	fmt.Printf("Response numbers: %d\n", len(metrics.List))
 }

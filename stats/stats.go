@@ -3,7 +3,7 @@ package stats
 import (
 	"github.com/kpister/go2wrk/structs"
 
-	"fmt"
+	"math"
 	"os"
 	"strconv"
 )
@@ -14,6 +14,7 @@ func Export(responseChannel chan *structs.Response, pos, iter int, url string, o
 		outputDirectory += "/"
 	}
 	filename := outputDirectory + "output_" + strconv.Itoa(iter) + "_" + strconv.Itoa(pos) + ".data"
+	os.Remove(filename)
 	output, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660);
 	if err != nil {
 		panic(err)
@@ -28,15 +29,25 @@ func Export(responseChannel chan *structs.Response, pos, iter int, url string, o
 }
 
 // Perform will take results, and find a definition of tail latency on that group. It will return the threshold and an empty bootstrap struct tails.
-func FindThreshold(responseChannel chan *structs.Response) int64 {
-	var latencies []int64
-	var sum int64
+func FindThreshold(responseChannel chan *structs.Response) (int, int) {
+	var latencies []int
+	var sum int
 
-	fmt.Println("finding stuff")
 	for response := range responseChannel {
-		latencies = append(latencies, response.Duration)
-		sum += response.Duration
+		latencies = append(latencies, int(response.Duration))
+		sum += int(response.Duration)
 	}
 
-	return sum / int64(len(latencies)) * 10
+	mean := sum / len(latencies)
+	sigma := int(calculateSTD(latencies, mean))
+
+	return mean + 3 * sigma, sigma
+}
+
+func calculateSTD(list []int, mean int) float64{
+	var variance float64
+	for _, value := range list {
+		variance += math.Pow(float64(value-mean), 2)
+	}
+	return math.Sqrt(variance / float64(len(list)))
 }

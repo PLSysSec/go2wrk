@@ -1,6 +1,9 @@
 package structs
 
-import "net/http"
+import (
+	"net/http"
+	"github.com/kpister/go2wrk/logger"
+)
 
 // TPSReport is a struct that contains the config file information.
 type TPSReport struct {
@@ -14,4 +17,5 @@ type TPSReport struct {
 	Frequency      float64
 	EndPercentage  float64
 	Transport      *http.Transport
+	Logger		   *logger.Logger
 }

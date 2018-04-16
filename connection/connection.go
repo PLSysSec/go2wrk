@@ -3,16 +3,18 @@ package connection
 import (
 	"github.com/kpister/go2wrk/structs"
 
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
 	"sync"
 	"time"
+	"os"
 )
 
 // Start starts a single connection to the app. It will hit multiple routes randomly
 // needs to take threshold and tails
-func Start(client *http.Client, route structs.Route, freq float64, responseChannel chan *structs.Response,
+func Start(tps structs.TPSReport, client *http.Client, route structs.Route, freq float64, responseChannel chan *structs.Response,
 	metrics *structs.Bootstrap, waitGroup *sync.WaitGroup) {
 	defer waitGroup.Done()
 	done := false
@@ -25,10 +27,10 @@ func Start(client *http.Client, route structs.Route, freq float64, responseChann
 
 		requestStart := time.Now()
 		res, err := client.Get(route.Url)
-        duration := time.Since(requestStart).Nanoseconds()
+        duration := time.Since(requestStart).Nanoseconds() /1000
 		if err != nil{
-			panic(err)
-			continue
+			fmt.Println("Error connecting to server. Is it turned on?")
+			os.Exit(1)
 		}
 		response := &structs.Response{
 			Start: requestStart,
@@ -39,6 +41,7 @@ func Start(client *http.Client, route structs.Route, freq float64, responseChann
 
 		select {
 		case responseChannel <- response:
+			tps.Logger.Increment()
 			if metrics != nil {
 				done = metrics.AddResponse(response.Duration)
 			}

@@ -2,16 +2,13 @@
     "Routes": 
     [
         {
-            "Url": "http://localhost:9292/abc"
-        },
-        {
             "Url": "http://localhost:9292/img"
         }
     ],
     "InitRoute": "http://localhost:9292/init",
     "MaxTestTime": 300.0,
-    "Connections": 2000,
-    "Samples": 200000,
+    "Connections": 100,
+    "Samples": 20000,
     "EndPercentage": 0.03,
     "Frequency": 24,
     "BreakMe":false,
