@@ -11,14 +11,14 @@ import (
 // Bootstrap is a struct that stores the latencies of all the responses.
 type Bootstrap struct {
 	sync.RWMutex
-	List          []int64
+	List          []int
 	Converged     bool
 	Samples       int
 	EndPercentage float64
 }
 
 // AddResponse appends a duration to the list of metrics, then returns 'Converged'. This function blocks.
-func (bootstrap *Bootstrap) AddResponse(duration int64) bool {
+func (bootstrap *Bootstrap) AddResponse(duration int) bool {
 	defer bootstrap.RUnlock()
 	bootstrap.RLock()
 
@@ -36,7 +36,7 @@ func (bootstrap *Bootstrap) Start() {
 		bootstrap.Lock()
 		bootstrap.Converged = tick(bootstrap)
 		bootstrap.Unlock()
-        time.Sleep(time.Second)
+        time.Sleep(time.Second / 2.0)
 	}
 }
 
@@ -73,11 +73,11 @@ func tick(bootstrap *Bootstrap) bool {
 	return false
 }
 
-func getBootstrapMean(metricsList []int64, random *rand.Rand) float64 {
+func getBootstrapMean(metricsList []int, random *rand.Rand) float64 {
 	var mean int64
 	for i := 0; i < len(metricsList); i++ {
 		index := random.Intn(len(metricsList))
-		mean += metricsList[index]
+		mean += int64(metricsList[index])
 	}
 	return float64(mean) / float64(len(metricsList))
 }

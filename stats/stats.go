@@ -9,22 +9,30 @@ import (
 )
 
 // Export is a function that outputs the time of response and latency for each request.
-func Export(responseChannel chan *structs.Response, pos, iter int, url string, outputDirectory string) {
+func Export(responseChannel chan *structs.Response, pos, iter int, route structs.Route, outputDirectory string) {
 	if outputDirectory != "" && string(outputDirectory[len(outputDirectory)-1]) != "/" {
 		outputDirectory += "/"
 	}
 	filename := outputDirectory + "output_" + strconv.Itoa(iter) + "_" + strconv.Itoa(pos) + ".data"
+	filename2 := outputDirectory + "output_" + strconv.Itoa(iter+1) + "_" + strconv.Itoa(pos) + ".data"
 	os.Remove(filename)
+	os.Remove(filename2)
 	output, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660);
+	output2, err := os.OpenFile(filename2, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660);
 	if err != nil {
 		panic(err)
 	}
 
-	output.WriteString(url + "\n")
+	output.WriteString(route.Url + "\n")
+	output2.WriteString(route.Url + "\n")
 
 	for response := range responseChannel {
-		line := strconv.FormatInt(response.Start.UnixNano()/1000, 10) + "," + strconv.FormatInt(response.Duration, 10) + "\n" // the 10 is for the base
-		output.WriteString(line)
+		line := strconv.FormatInt(response.Start.UnixNano()/1000, 10) + "," + strconv.Itoa(response.Duration) + "\n" // the 10 is for the base
+		if response.Duration > route.Threshold {
+			output.WriteString(line)
+		} else {
+			output2.WriteString(line)
+		}
 	}
 }
 

@@ -3,6 +3,9 @@
     [
         {
             "Url": "http://localhost:9292/img"
+        },
+        {
+            "Url": "http://localhost:9292/abc"
         }
     ],
     "InitRoute": "http://localhost:9292/init",

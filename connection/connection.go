@@ -27,7 +27,7 @@ func Start(tps structs.TPSReport, client *http.Client, route structs.Route, freq
 
 		requestStart := time.Now()
 		res, err := client.Get(route.Url)
-        duration := time.Since(requestStart).Nanoseconds() /1000
+        duration := int(time.Since(requestStart).Nanoseconds() /1000)
 		if err != nil{
 			fmt.Println("Error connecting to server. Is it turned on?")
 			os.Exit(1)
