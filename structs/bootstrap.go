@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+	"fmt"
 )
 
 // Bootstrap is a struct that stores the latencies of all the responses.
@@ -39,13 +40,15 @@ func (bootstrap *Bootstrap) Start() {
 	}
 }
 
+func (bootstrap *Bootstrap) Check() bool{
+	return bootstrap.Converged
+}
+
 func tick(bootstrap *Bootstrap) bool {
 	// only start bootstrapping after the specified number of responses
 	if len(bootstrap.List) < bootstrap.Samples {
 		return false
-	} else {
-        return true
-    }
+	} 
 
 	// basic bootstrapper that returns the average response time across samples
 	var mean float64
@@ -61,6 +64,8 @@ func tick(bootstrap *Bootstrap) bool {
 	variance := calculateVariance(bootstrapList, mean)
 	standardDeviation := math.Sqrt(variance)
 
+	fmt.Println(standardDeviation)
+	fmt.Println(mean)
 	// You are done if the deviation is less than the specified percentage
 	if standardDeviation < (bootstrap.EndPercentage * mean) {
 		return true

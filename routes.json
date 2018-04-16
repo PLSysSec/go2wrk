@@ -8,8 +8,8 @@
     "InitRoute": "http://localhost:9292/init",
     "MaxTestTime": 300.0,
     "Connections": 100,
-    "Samples": 20000,
-    "EndPercentage": 0.03,
+    "Samples": 800,
+    "EndPercentage": 0.01,
     "Frequency": 24,
     "BreakMe":false,
     "MaxConnections":4000

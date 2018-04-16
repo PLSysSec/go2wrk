@@ -41,9 +41,13 @@ func Start(tps structs.TPSReport, client *http.Client, route structs.Route, freq
 
 		select {
 		case responseChannel <- response:
-			tps.Logger.Increment()
-			if metrics != nil {
+			if metrics != nil && int(duration) > route.Threshold{
+				tps.Logger.Increment()
 				done = metrics.AddResponse(response.Duration)
+			} else if metrics == nil {
+				tps.Logger.Increment()
+			} else {
+				done = metrics.Check()
 			}
 		default:
 			done = true

@@ -5,13 +5,14 @@ import (
 	"github.com/kpister/go2wrk/stats"
 	"github.com/kpister/go2wrk/structs"
 
+	"fmt"
 	"time"
 	"net/http"
 	"sync"
 )
 
 // Warmup performs a short warmup on the server. 
-func Warmup(tps structs.TPSReport, index int) (int, int){
+func Warmup(tps structs.TPSReport, index int) int{
 	waitGroup := &sync.WaitGroup{}
 	warmupData := make(chan *structs.Response, 100 * int64(tps.Connections))
 
@@ -58,6 +59,7 @@ func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int)
 	// doing this in main
 	go (&metrics).Start() // start bootstrapping
 	waitGroup.Wait()
+	fmt.Println("Saving responses to disk")
 	tps.Logger.Kill()
 	tps.Logger.Queue("Saving responses to disk")
 

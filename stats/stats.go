@@ -29,7 +29,7 @@ func Export(responseChannel chan *structs.Response, pos, iter int, url string, o
 }
 
 // Perform will take results, and find a definition of tail latency on that group. It will return the threshold and an empty bootstrap struct tails.
-func FindThreshold(responseChannel chan *structs.Response) (int, int) {
+func FindThreshold(responseChannel chan *structs.Response) int {
 	var latencies []int
 	var sum int
 
@@ -41,7 +41,7 @@ func FindThreshold(responseChannel chan *structs.Response) (int, int) {
 	mean := sum / len(latencies)
 	sigma := int(calculateSTD(latencies, mean))
 
-	return mean + 3 * sigma, sigma
+	return mean + 2 * sigma
 }
 
 func calculateSTD(list []int, mean int) float64{
