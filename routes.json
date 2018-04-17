@@ -2,7 +2,7 @@
     "Routes": 
     [
         {
-            "Url": "http://localhost:9292/img"
+            "Url": "http://localhost:9292"
         },
         {
             "Url": "http://localhost:9292/abc"

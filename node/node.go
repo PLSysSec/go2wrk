@@ -9,6 +9,7 @@ import (
 	"sync"
 )
 
+/*
 // Warmup performs a short warmup on the server. 
 func Warmup(tps structs.TPSReport, index int) int{
 	waitGroup := &sync.WaitGroup{}
@@ -24,32 +25,57 @@ func Warmup(tps structs.TPSReport, index int) int{
 	close(warmupData)
 	return stats.FindThreshold(warmupData)
 }
+*/
+
+// Barrage will create connections that fire requests at the server. Then it creates the output.
+func ShortBarrage(tps structs.TPSReport) {
+	var channels []chan *structs.Response
+	for i := 0; i < len(tps.Routes); i++ {
+		channels = append(channels, make(chan *structs.Response, 200*int64(tps.Connections)))
+	}
+	tr := &http.Transport{}
+	client := &http.Client{Transport: tr}
+	waitGroup := &sync.WaitGroup{}
+
+	index := 0
+	for i := 0; i < tps.Connections; i++ {
+		// add threshold and tails to the params
+		index = i %len(tps.Routes)
+		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], nil, waitGroup)
+		waitGroup.Add(1)
+	}
+	waitGroup.Wait()
+	for i, _ := range tps.Routes{
+		close(channels[i])
+		tps.Routes[i].Threshold = stats.FindThreshold(channels[i])
+	}
+}
 
 // Barrage will create connections that fire requests at the server. Then it creates the output.
 func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int) {
 	var channels []chan *structs.Response
+	var metrics []structs.Bootstrap
 	for i := 0; i < len(tps.Routes); i++ {
 		channels = append(channels, make(chan *structs.Response, int64(1000*tps.Frequency)*int64(tps.Connections)))
+		metrics = append(metrics, structs.Bootstrap{
+											List: make([]int, 0), 
+											Converged: false, 
+											Samples: tps.Samples, 
+											EndPercentage: tps.EndPercentage,
+										})
 	}
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
-
-	// shared response metric collector and corresponding lock
-	metrics := structs.Bootstrap{
-		List:          make([]int, 0),
-		Converged:     false,
-		Samples:       tps.Samples,
-		EndPercentage: tps.EndPercentage,
-	}
 	waitGroup := &sync.WaitGroup{}
 
+	index := 0
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
-		go connection.Start(tps, client, tps.Routes[i%len(tps.Routes)], tps.Frequency, channels[i%len(tps.Routes)], &metrics, waitGroup)
+		index = i %len(tps.Routes)
+		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], &metrics[index], waitGroup)
+		go (&metrics[index]).Start()
 		waitGroup.Add(1)
 	}
-	// doing this in main
-	go (&metrics).Start() // start bootstrapping
 	waitGroup.Wait()
 	tps.Logger.Kill()
 	tps.Logger.Queue("Saving responses to disk")

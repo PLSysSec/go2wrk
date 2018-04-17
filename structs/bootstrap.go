@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"sync"
 	"time"
-	"fmt"
+	//"fmt"
 )
 
 // Bootstrap is a struct that stores the latencies of all the responses.
@@ -30,9 +30,9 @@ func (bootstrap *Bootstrap) AddResponse(duration int) bool {
 // Bootstrap performs the bootstrapping algorithm described here: https://en.wikipedia.org/wiki/Bootstrapping_(statistics).
 func (bootstrap *Bootstrap) Start() {
 	for {
-        if bootstrap.Converged {
-            break
-        }
+        if bootstrap.Converged{
+			break
+		}
 		bootstrap.Lock()
 		bootstrap.Converged = tick(bootstrap)
 		bootstrap.Unlock()
@@ -64,8 +64,8 @@ func tick(bootstrap *Bootstrap) bool {
 	variance := calculateVariance(bootstrapList, mean)
 	standardDeviation := math.Sqrt(variance)
 
-	fmt.Println(standardDeviation)
-	fmt.Println(mean)
+	//fmt.Println(standardDeviation)
+	//fmt.Println(mean)
 	// You are done if the deviation is less than the specified percentage
 	if standardDeviation < (bootstrap.EndPercentage * mean) {
 		return true
@@ -75,7 +75,7 @@ func tick(bootstrap *Bootstrap) bool {
 
 func getBootstrapMean(metricsList []int, random *rand.Rand) float64 {
 	var mean int64
-	for i := 0; i < len(metricsList); i++ {
+	for i := 0; i < len(metricsList) * 4; i++ {
 		index := random.Intn(len(metricsList))
 		mean += int64(metricsList[index])
 	}

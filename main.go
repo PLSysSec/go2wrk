@@ -11,7 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"syscall"
-	"strconv"
+	//"strconv"
 )
 
 var (
@@ -48,15 +48,18 @@ func main() {
 	tps.Logger = &logger.Logger{}
 	tps.Logger.Initialize(tps.Connections * 2)
 	go tps.Logger.Log()
+	tps.Logger.Queue("Warming up")
+	node.ShortBarrage(tps)
 
+	/*
 	for i, _ := range tps.Routes {
 		tps.Logger.Queue("Warming up cache on route " + tps.Routes[i].Url)
 		tps.Routes[i].Threshold = node.Warmup(tps, 0)
-		tps.Logger.Queue("Threshold: " + strconv.Itoa(tps.Routes[i].Threshold))
+		tps.Logger.Queue("\nThreshold: " + strconv.Itoa(tps.Routes[i].Threshold))
 		tps.Logger.Counter = 0
 		tps.Logger.Responses = 0
-	}
-	tps.Logger.Queue("Warmup complete")
+	}*/
+	tps.Logger.Queue("Starting Benchmark")
     //connection.Init(tps)
 	node.Barrage(tps, *outputDirectory, 0)
 }
