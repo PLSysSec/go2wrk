@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/kpister/go2wrk/logger"
 	"github.com/kpister/go2wrk/node"
 	"github.com/kpister/go2wrk/structs"
-	"github.com/kpister/go2wrk/logger"
 
 	"encoding/json"
 	"flag"
@@ -15,10 +15,10 @@ import (
 )
 
 var (
-	tps               structs.TPSReport
-	configFile        = flag.String("f", "routes.json", "the file to read routes from")
-	outputDirectory   = flag.String("o", "", "the output directory to work with")
-	help              = flag.Bool("h", false, "for usage")
+	tps             structs.TPSReport
+	configFile      = flag.String("f", "routes.json", "the file to read routes from")
+	outputDirectory = flag.String("o", "", "the output directory to work with")
+	help            = flag.Bool("h", false, "for usage")
 )
 
 func init() {
@@ -52,20 +52,20 @@ func main() {
 	node.ShortBarrage(tps)
 
 	/*
-	for i, _ := range tps.Routes {
-		tps.Logger.Queue("Warming up cache on route " + tps.Routes[i].Url)
-		tps.Routes[i].Threshold = node.Warmup(tps, 0)
-		tps.Logger.Queue("\nThreshold: " + strconv.Itoa(tps.Routes[i].Threshold))
-		tps.Logger.Counter = 0
-		tps.Logger.Responses = 0
-	}*/
+		for i, _ := range tps.Routes {
+			tps.Logger.Queue("Warming up cache on route " + tps.Routes[i].Url)
+			tps.Routes[i].Threshold = node.Warmup(tps, 0)
+			tps.Logger.Queue("\nThreshold: " + strconv.Itoa(tps.Routes[i].Threshold))
+			tps.Logger.Counter = 0
+			tps.Logger.Responses = 0
+		}*/
 	tps.Logger.Queue("Starting Benchmark")
-    //connection.Init(tps)
+	//connection.Init(tps)
 	node.Barrage(tps, *outputDirectory, 0)
 }
 
 // From peterSO on Stack Exchange
-func setRLimit(){
+func setRLimit() {
 	var rLimit syscall.Rlimit
 	err := syscall.Getrlimit(syscall.RLIMIT_NOFILE, &rLimit)
 	if err != nil {

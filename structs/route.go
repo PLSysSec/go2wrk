@@ -6,5 +6,5 @@ type Route struct {
 	MandatoryDependencies             []Route
 	LikelyDependencies                []Route
 	Samples                           int
-	Threshold 						  int
+	Threshold                         int
 }

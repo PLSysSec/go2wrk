@@ -10,7 +10,7 @@ import (
 )
 
 /*
-// Warmup performs a short warmup on the server. 
+// Warmup performs a short warmup on the server.
 func Warmup(tps structs.TPSReport, index int) int{
 	waitGroup := &sync.WaitGroup{}
 	warmupData := make(chan *structs.Response, 100 * int64(tps.Connections))
@@ -40,12 +40,12 @@ func ShortBarrage(tps structs.TPSReport) {
 	index := 0
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
-		index = i %len(tps.Routes)
+		index = i % len(tps.Routes)
 		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], nil, waitGroup)
 		waitGroup.Add(1)
 	}
 	waitGroup.Wait()
-	for i, _ := range tps.Routes{
+	for i, _ := range tps.Routes {
 		close(channels[i])
 		tps.Routes[i].Threshold = stats.FindThreshold(channels[i])
 	}
@@ -58,11 +58,11 @@ func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int)
 	for i := 0; i < len(tps.Routes); i++ {
 		channels = append(channels, make(chan *structs.Response, int64(1000*tps.Frequency)*int64(tps.Connections)))
 		metrics = append(metrics, structs.Bootstrap{
-											List: make([]int, 0), 
-											Converged: false, 
-											Samples: tps.Samples, 
-											EndPercentage: tps.EndPercentage,
-										})
+			List:          make([]int, 0),
+			Converged:     false,
+			Samples:       tps.Samples,
+			EndPercentage: tps.EndPercentage,
+		})
 	}
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
@@ -71,7 +71,7 @@ func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int)
 	index := 0
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
-		index = i %len(tps.Routes)
+		index = i % len(tps.Routes)
 		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], &metrics[index], waitGroup)
 		go (&metrics[index]).Start()
 		waitGroup.Add(1)

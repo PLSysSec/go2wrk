@@ -30,17 +30,17 @@ func (bootstrap *Bootstrap) AddResponse(duration int) bool {
 // Bootstrap performs the bootstrapping algorithm described here: https://en.wikipedia.org/wiki/Bootstrapping_(statistics).
 func (bootstrap *Bootstrap) Start() {
 	for {
-        if bootstrap.Converged{
+		if bootstrap.Converged {
 			break
 		}
 		bootstrap.Lock()
 		bootstrap.Converged = tick(bootstrap)
 		bootstrap.Unlock()
-        time.Sleep(time.Second / 2.0)
+		time.Sleep(time.Second / 2.0)
 	}
 }
 
-func (bootstrap *Bootstrap) Check() bool{
+func (bootstrap *Bootstrap) Check() bool {
 	return bootstrap.Converged
 }
 
@@ -48,7 +48,7 @@ func tick(bootstrap *Bootstrap) bool {
 	// only start bootstrapping after the specified number of responses
 	if len(bootstrap.List) < bootstrap.Samples {
 		return false
-	} 
+	}
 
 	// basic bootstrapper that returns the average response time across samples
 	var mean float64
@@ -75,7 +75,7 @@ func tick(bootstrap *Bootstrap) bool {
 
 func getBootstrapMean(metricsList []int, random *rand.Rand) float64 {
 	var mean int64
-	for i := 0; i < len(metricsList) * 4; i++ {
+	for i := 0; i < len(metricsList)*4; i++ {
 		index := random.Intn(len(metricsList))
 		mean += int64(metricsList[index])
 	}

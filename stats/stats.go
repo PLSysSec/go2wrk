@@ -17,8 +17,8 @@ func Export(responseChannel chan *structs.Response, pos, iter int, route structs
 	filename2 := outputDirectory + "output_" + strconv.Itoa(iter+1) + "_" + strconv.Itoa(pos) + ".data"
 	os.Remove(filename)
 	os.Remove(filename2)
-	output, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660);
-	output2, err := os.OpenFile(filename2, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660);
+	output, err := os.OpenFile(filename, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
+	output2, err := os.OpenFile(filename2, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
 	if err != nil {
 		panic(err)
 	}
@@ -49,10 +49,10 @@ func FindThreshold(responseChannel chan *structs.Response) int {
 	mean := sum / len(latencies)
 	sigma := int(calculateSTD(latencies, mean))
 
-	return mean + 2 * sigma
+	return mean + 2*sigma
 }
 
-func calculateSTD(list []int, mean int) float64{
+func calculateSTD(list []int, mean int) float64 {
 	var variance float64
 	for _, value := range list {
 		variance += math.Pow(float64(value-mean), 2)
