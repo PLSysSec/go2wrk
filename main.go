@@ -59,8 +59,9 @@ func main() {
 			tps.Logger.Counter = 0
 			tps.Logger.Responses = 0
 		}*/
-	tps.Logger.Queue("Starting Benchmark")
-	//connection.Init(tps)
+	tps.Logger.Counter = 0
+	tps.Logger.Responses = 0
+	tps.Logger.Queue("\nStarting Benchmark")
 	node.Barrage(tps, *outputDirectory, 0)
 }
 

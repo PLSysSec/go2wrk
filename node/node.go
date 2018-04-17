@@ -31,7 +31,7 @@ func Warmup(tps structs.TPSReport, index int) int{
 func ShortBarrage(tps structs.TPSReport) {
 	var channels []chan *structs.Response
 	for i := 0; i < len(tps.Routes); i++ {
-		channels = append(channels, make(chan *structs.Response, 200*int64(tps.Connections)))
+		channels = append(channels, make(chan *structs.Response, 100*int64(tps.Connections)))
 	}
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
@@ -54,26 +54,34 @@ func ShortBarrage(tps structs.TPSReport) {
 // Barrage will create connections that fire requests at the server. Then it creates the output.
 func Barrage(tps structs.TPSReport, outputDirectory string, outputIteration int) {
 	var channels []chan *structs.Response
-	var metrics []structs.Bootstrap
+	//var metrics []structs.Bootstrap
 	for i := 0; i < len(tps.Routes); i++ {
 		channels = append(channels, make(chan *structs.Response, int64(1000*tps.Frequency)*int64(tps.Connections)))
+		/*
 		metrics = append(metrics, structs.Bootstrap{
 			List:          make([]int, 0),
 			Converged:     false,
 			Samples:       tps.Samples,
 			EndPercentage: tps.EndPercentage,
-		})
+		})*/
+	}
+	metrics := structs.Bootstrap{
+		List:          make([]int, 0),
+		Converged:     false,
+		Samples:       tps.Samples,
+		EndPercentage: tps.EndPercentage,
 	}
 	tr := &http.Transport{}
 	client := &http.Client{Transport: tr}
 	waitGroup := &sync.WaitGroup{}
+	connection.Init(tps)
 
 	index := 0
 	for i := 0; i < tps.Connections; i++ {
 		// add threshold and tails to the params
 		index = i % len(tps.Routes)
-		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], &metrics[index], waitGroup)
-		go (&metrics[index]).Start()
+		go connection.Start(tps, client, tps.Routes[index], tps.Frequency, channels[index], &metrics, waitGroup)
+		go (&metrics).Start()
 		waitGroup.Add(1)
 	}
 	waitGroup.Wait()
